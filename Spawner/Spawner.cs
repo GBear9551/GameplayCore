@@ -1,12 +1,14 @@
 /*
  Author: Gary Lougheed
  Date Created: ~2/08/2026
- Version: 2
+ Last Edit: ~2/24/2026 - by Gary Lougheed
+ Version: 3
  Dependencies: GameObjectPool, PooledGameObject
  Description: A generic spawner used to spawn game objects.
 */
 
 
+using GameDevTV;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -19,7 +21,8 @@ public class Spawner : MonoBehaviour
     {
  
        [Header("Spawner Settings")]
-       [SerializeField] private bool m_repeatSpawn = false; // Whether to repeat the spawning process after the initial spawn.
+       [SerializeField] SpawnerConfig m_SpawnerConfig;
+       /*[SerializeField] private bool m_repeatSpawn = false; // Whether to repeat the spawning process after the initial spawn.
        [SerializeField, Range(1,100)] private int  m_numOfSpawnWavesRequested = 1;
        [SerializeField] private bool m_randomizeSpawnDelay = false;
        [SerializeField] private bool m_randomizeSpawnCycleDelay = false;
@@ -39,7 +42,7 @@ public class Spawner : MonoBehaviour
        [SerializeField] List<Transform> m_spawnPoints;
        [SerializeField] Transform m_startingSpawnTransform;
        [SerializeField] Transform m_directionHelper; // Helper transform to visualize the spawning direction in the editor
-      
+       */
        [Header("Transformation changes are called before OnSpawn")]
        public UnityEvent<GameObject> OnTransformChanges;
        public UnityEvent<GameObject> OnSpawned; // Event to notify when a GameObject is spawned
@@ -49,15 +52,15 @@ public class Spawner : MonoBehaviour
 
     private void Start()
     {
-
-      if (m_gameObjectPool == null)
+      
+      if ( m_SpawnerConfig.GetGameObjectPool() == null)
       {
         Debug.LogError("No GameObjectPool assigned to spawner!");
         return;
-    }
+      }
 
-    OnStartSpawner?.Invoke(); 
-    OnFinishedSpawning?.Invoke(GetActiveGameObjectsFromSpawner());
+      OnStartSpawner?.Invoke(); 
+      OnFinishedSpawning?.Invoke(GetActiveGameObjectsFromSpawner());
 
 
       //StartCoroutine(SpawnGameObjectInBoundaryRoutine(m_spawnInterval)); // Spawn a new GameObject every 1 second (adjust the interval as needed)      
@@ -71,20 +74,26 @@ public class Spawner : MonoBehaviour
     private IEnumerator SpawnGameObjectsAlongSpawnPointsRoutine()
     {
     // Declare and initialize local variables, specific to the SpawnGameObjectsRoutine method scope.
-    int currentIndex = 0;
-    var spawnIntervalWaiter = new WaitForSeconds(m_spawnInterval); // WaitForSeconds object to handle the spawn interval delay between spawns.
-    var spawnCycleDelayWaiter = new WaitForSeconds(m_SpawnCycleDelay); // WaitForSeconds object to handle the delay between spawn cycles when repeat spawning is enabled.
-    
+      int currentIndex = 0;
+      float spawnInterval = m_SpawnerConfig.GetSpawnInterval();
+      float spawnCycleDelay = m_SpawnerConfig.GetSpawnCycleDelay();
+      float numOfGameObjsToSpawn = m_SpawnerConfig.GetNumberOfGameObjectsToSpawn();
+      bool repeatSpawn = m_SpawnerConfig.GetRepeatSpawn();
+      int numOfSpawnWavesRequested = m_SpawnerConfig.GetNumOfSpawnWavesRequested();
+      GameObjectPool gameObjectPool = m_SpawnerConfig.GetGameObjectPool();
+      var spawnIntervalWaiter = new WaitForSeconds(spawnInterval); // WaitForSeconds object to handle the spawn interval delay between spawns.
+      var spawnCycleDelayWaiter = new WaitForSeconds(spawnCycleDelay); // WaitForSeconds object to handle the delay between spawn cycles when repeat spawning is enabled.
+      
     // Loop while repeat spawner is true, if repeat spawner is false, this loop will only run once, effectively making it a one time spawn of the specified number of GameObjects.
     do
     {
 
       // Loop to spawn the specified number of GameObjects.
-      for (currentIndex = 0; currentIndex < m_numberOfGameObjectsToSpawn; currentIndex++)
+      for (currentIndex = 0; currentIndex < numOfGameObjsToSpawn; currentIndex++)
       {
 
         // Get a GameObject from the pool and spawn it in the specified direction with the specified spacing.
-        var gameObjectFromPool = m_gameObjectPool.Pool.Get();
+        var gameObjectFromPool = gameObjectPool.Pool.Get();
 
         if (gameObjectFromPool != null)
         {
@@ -104,13 +113,13 @@ public class Spawner : MonoBehaviour
       }
 
       // Check for the number of cycles completed, if it is equal to the number of cycles to repeat, then set repeat spawn to false to stop the spawning process. This allows for a finite number of spawn cycles if desired, otherwise it will continue indefinitely if repeat spawn is true and no cycle limit is set
-      if (m_numOfCyclesCompleted == m_numOfSpawnWavesRequested)
+      if (m_numOfCyclesCompleted == numOfSpawnWavesRequested)
       {
-        m_repeatSpawn = false; // Set repeat spawn to false to stop the spawning process after the desired number of spawn cycles is completed.
+        repeatSpawn = false; // Set repeat spawn to false to stop the spawning process after the desired number of spawn cycles is completed.
       }
 
       // Wait for the delay between spawn cycles if repeat spawning is enabled before starting the next spawn cycle.
-      if (m_repeatSpawn)
+      if (repeatSpawn)
       {
         yield return spawnCycleDelayWaiter; // Wait for the specified spawn cycle delay before starting the next spawn cycle.
       }
@@ -118,7 +127,7 @@ public class Spawner : MonoBehaviour
       // Update loop variant, used to control the terminating condition.
       m_numOfCyclesCompleted++;
 
-    } while (m_repeatSpawn); // Check the repeat spawn condition to determine whether to continue spawning GameObjects in a loop or not.
+    } while (repeatSpawn); // Check the repeat spawn condition to determine whether to continue spawning GameObjects in a loop or not.
                              // Function return stubb
 
     yield return null;
@@ -126,12 +135,13 @@ public class Spawner : MonoBehaviour
 
     private Vector3 GetSpawnPoint(int index)
     {
-      if(m_spawnPoints.Count == 0)
+      List<Transform> spawnPoints = m_SpawnerConfig.GetSpawnPoints();
+      if(spawnPoints.Count == 0)
       {
         Debug.LogError("No spawn points assigned to spawner!");
         return Vector3.zero;
       }
-      return m_spawnPoints[index % m_spawnPoints.Count].position; // Loop through spawn points if index exceeds the list count
+      return spawnPoints[index % spawnPoints.Count].position; // Loop through spawn points if index exceeds the list count
   }
 
   public void SpawnGameObjectsIn3DBoxRegion()
@@ -141,21 +151,29 @@ public class Spawner : MonoBehaviour
     
     private IEnumerator SpawnGameObjectsIn3DBoxRegionRoutine()
     {
-      // Declare and initialize local variables, specific to the SpawnGameObjectsRoutine method scope.
-      int currentIndex = 0;
-      var spawnIntervalWaiter = new WaitForSeconds(m_spawnInterval); // WaitForSeconds object to handle the spawn interval delay between spawns.
-      var spawnCycleDelayWaiter = new WaitForSeconds(m_SpawnCycleDelay); // WaitForSeconds object to handle the delay between spawn cycles when repeat spawning is enabled.
-      int maxNumOfAttempts = 25;
+    // Declare and initialize local variables, specific to the SpawnGameObjectsRoutine method scope.
+    int currentIndex = 0;
+    float spawnInterval = m_SpawnerConfig.GetSpawnInterval();
+    float spawnCycleDelay = m_SpawnerConfig.GetSpawnCycleDelay();
+    float numOfGameObjsToSpawn = m_SpawnerConfig.GetNumberOfGameObjectsToSpawn();
+    bool repeatSpawn = m_SpawnerConfig.GetRepeatSpawn();
+    int numOfSpawnWavesRequested = m_SpawnerConfig.GetNumOfSpawnWavesRequested();
+    GameObjectPool gameObjectPool = m_SpawnerConfig.GetGameObjectPool();
+    Collider spawnRegion3D = m_SpawnerConfig.GetSpawnRegion3D();
+    var spawnIntervalWaiter = new WaitForSeconds(spawnInterval); // WaitForSeconds object to handle the spawn interval delay between spawns.
+    var spawnCycleDelayWaiter = new WaitForSeconds(spawnCycleDelay); // WaitForSeconds object to handle the delay between spawn cycles when repeat spawning is enabled.
+   
+    int maxNumOfAttempts = 25;
       // Loop while repeat spawner is true, if repeat spawner is false, this loop will only run once, effectively making it a one time spawn of the specified number of GameObjects.
       do
       {
 
         // Loop to spawn the specified number of GameObjects.
-        for (currentIndex = 0; currentIndex < m_numberOfGameObjectsToSpawn; currentIndex++)
+        for (currentIndex = 0; currentIndex < numOfGameObjsToSpawn; currentIndex++)
         {
 
           // Get a GameObject from the pool and spawn it in the specified direction with the specified spacing.
-          var gameObjectFromPool = m_gameObjectPool.Pool.Get();
+          var gameObjectFromPool = gameObjectPool.Pool.Get();
 
           if (gameObjectFromPool != null)
           {
@@ -164,7 +182,7 @@ public class Spawner : MonoBehaviour
             OnTransformChanges?.Invoke(gameObjectFromPool);
 
             // Get a random position in the region provided, check to see if there is an object there, if so find a new random spot in the region.
-            gameObjectFromPool.transform.position = GetSpawnPositionForObjFromSpawnRegion3D(gameObjectFromPool, m_spawnRegion3D, maxNumOfAttempts);
+            gameObjectFromPool.transform.position = GetSpawnPositionForObjFromSpawnRegion3D(gameObjectFromPool, spawnRegion3D, maxNumOfAttempts);
 
             OnSpawned?.Invoke(gameObjectFromPool); // Invoke the OnSpawned event to notify subscribers that a GameObject has been spawned
           }
@@ -175,13 +193,13 @@ public class Spawner : MonoBehaviour
         }
 
         // Check for the number of cycles completed, if it is equal to the number of cycles to repeat, then set repeat spawn to false to stop the spawning process. This allows for a finite number of spawn cycles if desired, otherwise it will continue indefinitely if repeat spawn is true and no cycle limit is set
-        if (m_numOfCyclesCompleted == m_numOfSpawnWavesRequested)
+        if (m_numOfCyclesCompleted == numOfSpawnWavesRequested)
         {
-          m_repeatSpawn = false; // Set repeat spawn to false to stop the spawning process after the desired number of spawn cycles is completed.
+          repeatSpawn = false; // Set repeat spawn to false to stop the spawning process after the desired number of spawn cycles is completed.
         }
 
         // Wait for the delay between spawn cycles if repeat spawning is enabled before starting the next spawn cycle.
-        if (m_repeatSpawn)
+        if (repeatSpawn)
         {
           yield return spawnCycleDelayWaiter; // Wait for the specified spawn cycle delay before starting the next spawn cycle.
         }
@@ -189,7 +207,7 @@ public class Spawner : MonoBehaviour
         // Update loop variant, used to control the terminating condition.
         m_numOfCyclesCompleted++;
 
-      } while (m_repeatSpawn); // Check the repeat spawn condition to determine whether to continue spawning GameObjects in a loop or not.
+      } while (repeatSpawn); // Check the repeat spawn condition to determine whether to continue spawning GameObjects in a loop or not.
                                // Function return stubb
 
       yield return null;
@@ -250,9 +268,10 @@ public class Spawner : MonoBehaviour
 
     public void SpawnGameObjectsInARegion2D()
     {
-      if (m_spawnRegion2D != null)
+      Collider2D spawnRegion2D = m_SpawnerConfig.GetSpawnRegion2D();
+      if (spawnRegion2D != null)
       {
-        StartCoroutine(SpawnGameObjectsInARegion2DRoutine(m_spawnRegion2D));
+        StartCoroutine(SpawnGameObjectsInARegion2DRoutine(spawnRegion2D));
       }
       else
       {
@@ -263,21 +282,29 @@ public class Spawner : MonoBehaviour
     private IEnumerator SpawnGameObjectsInARegion2DRoutine(Collider2D collider)
     {
     // Declare and initialize local variables, specific to the SpawnGameObjectsRoutine method scope.
-    Vector3 startingPosition = m_startingSpawnTransform.position; // Starting position for spawning GameObjects, set in the Unity Editor
+    Transform startingSpawnTransform = m_SpawnerConfig.GetStartingSpawnTransform();
+    Vector3 startingPosition = startingSpawnTransform.position; // Starting position for spawning GameObjects, set in the Unity Editor
     int currentIndex = 0;
-    var spawnIntervalWaiter = new WaitForSeconds(m_spawnInterval); // WaitForSeconds object to handle the spawn interval delay between spawns.
-    var spawnCycleDelayWaiter = new WaitForSeconds(m_SpawnCycleDelay); // WaitForSeconds object to handle the delay between spawn cycles when repeat spawning is enabled.
+    float spawnInterval = m_SpawnerConfig.GetSpawnInterval();
+    float spawnCycleDelay = m_SpawnerConfig.GetSpawnCycleDelay();
+    float numOfGameObjsToSpawn = m_SpawnerConfig.GetNumberOfGameObjectsToSpawn();
+    bool repeatSpawn = m_SpawnerConfig.GetRepeatSpawn();
+    int numOfSpawnWavesRequested = m_SpawnerConfig.GetNumOfSpawnWavesRequested();
+    GameObjectPool gameObjectPool = m_SpawnerConfig.GetGameObjectPool();
+    var spawnIntervalWaiter = new WaitForSeconds(spawnInterval); // WaitForSeconds object to handle the spawn interval delay between spawns.
+    var spawnCycleDelayWaiter = new WaitForSeconds(spawnCycleDelay); // WaitForSeconds object to handle the delay between spawn cycles when repeat spawning is enabled.
+
     int maxNumOfAttempts = 25;
     // Loop while repeat spawner is true, if repeat spawner is false, this loop will only run once, effectively making it a one time spawn of the specified number of GameObjects.
     do
     {
 
       // Loop to spawn the specified number of GameObjects.
-      for (currentIndex = 0; currentIndex < m_numberOfGameObjectsToSpawn; currentIndex++)
+      for (currentIndex = 0; currentIndex < numOfGameObjsToSpawn; currentIndex++)
       {
 
         // Get a GameObject from the pool and spawn it in the specified direction with the specified spacing.
-        var gameObjectFromPool = m_gameObjectPool.Pool.Get();
+        var gameObjectFromPool = gameObjectPool.Pool.Get();
 
         if (gameObjectFromPool != null)
         {
@@ -297,13 +324,13 @@ public class Spawner : MonoBehaviour
       }
 
       // Check for the number of cycles completed, if it is equal to the number of cycles to repeat, then set repeat spawn to false to stop the spawning process. This allows for a finite number of spawn cycles if desired, otherwise it will continue indefinitely if repeat spawn is true and no cycle limit is set
-      if (m_numOfCyclesCompleted == m_numOfSpawnWavesRequested)
+      if (m_numOfCyclesCompleted == numOfSpawnWavesRequested)
       {
-        m_repeatSpawn = false; // Set repeat spawn to false to stop the spawning process after the desired number of spawn cycles is completed.
+        repeatSpawn = false; // Set repeat spawn to false to stop the spawning process after the desired number of spawn cycles is completed.
       }
 
       // Wait for the delay between spawn cycles if repeat spawning is enabled before starting the next spawn cycle.
-      if (m_repeatSpawn)
+      if (repeatSpawn)
       {
         yield return spawnCycleDelayWaiter; // Wait for the specified spawn cycle delay before starting the next spawn cycle.
       }
@@ -311,7 +338,7 @@ public class Spawner : MonoBehaviour
       // Update loop variant, used to control the terminating condition.
       m_numOfCyclesCompleted++;
 
-    } while (m_repeatSpawn); // Check the repeat spawn condition to determine whether to continue spawning GameObjects in a loop or not.
+    } while (repeatSpawn); // Check the repeat spawn condition to determine whether to continue spawning GameObjects in a loop or not.
                              // Function return stubb
 
     yield return null;
@@ -319,36 +346,46 @@ public class Spawner : MonoBehaviour
 
     public void SpawnObjectsInALine()
     {
-      m_spawningDirection = m_directionHelper.position - m_startingSpawnTransform.position; // Calculate the spawning direction based on the helper transform's position relative to the starting spawn transform's position
-      m_spawningDirection = m_spawningDirection.normalized; // Normalize the spawning direction to ensure consistent spacing between spawned GameObjects                                                                                            
-      StartCoroutine(SpawnGameObjectsInALineRoutine(m_spawningDirection, m_spacing));
+      float spacing = m_SpawnerConfig.GetSpacing();
+      Transform directionHelper = m_SpawnerConfig.GetDirectionHelper();
+      Transform startingSpawnTransform = m_SpawnerConfig.GetStartingSpawnTransform();
+      Vector3 spawningDirection = directionHelper.position - startingSpawnTransform.position; // Calculate the spawning direction based on the helper transform's position relative to the starting spawn transform's position
+      spawningDirection = spawningDirection.normalized; // Normalize the spawning direction to ensure consistent spacing between spawned GameObjects                                                                                            
+      StartCoroutine(SpawnGameObjectsInALineRoutine(spawningDirection, spacing));
     }
 
     public void SpawnGameObjectsInLine(Vector3 spawningDir, float spacing, int numOfObjectsToSpawn)
     {
 
-      m_numberOfGameObjectsToSpawn = numOfObjectsToSpawn; // Update the number of GameObjects to spawn based on the method parameter
+      m_SpawnerConfig.SetNumberOfGameObjectsToSpawn(numOfObjectsToSpawn); // Update the number of GameObjects to spawn based on the method parameter
       StartCoroutine(SpawnGameObjectsInALineRoutine(spawningDir, spacing));
     }
 
     private IEnumerator SpawnGameObjectsInALineRoutine(Vector3 spawningDirection, float distanceBetweenGameObjects)
     {
       // Declare and initialize local variables, specific to the SpawnGameObjectsRoutine method scope.
-      Vector3 startingPosition = m_startingSpawnTransform.position; // Starting position for spawning GameObjects, set in the Unity Editor
+      Transform startingSpawnTransform = m_SpawnerConfig.GetStartingSpawnTransform();
+      Vector3 startingPosition = startingSpawnTransform.position; // Starting position for spawning GameObjects, set in the Unity Editor
       int currentIndex = 0;
-      var spawnIntervalWaiter = new WaitForSeconds(m_spawnInterval); // WaitForSeconds object to handle the spawn interval delay between spawns.
-      var spawnCycleDelayWaiter = new WaitForSeconds(m_SpawnCycleDelay); // WaitForSeconds object to handle the delay between spawn cycles when repeat spawning is enabled.
+      float spawnInterval = m_SpawnerConfig.GetSpawnInterval();
+      float spawnCycleDelay = m_SpawnerConfig.GetSpawnCycleDelay();
+      float numOfGameObjsToSpawn = m_SpawnerConfig.GetNumberOfGameObjectsToSpawn();
+      bool repeatSpawn = m_SpawnerConfig.GetRepeatSpawn();
+      int numOfSpawnWavesRequested = m_SpawnerConfig.GetNumOfSpawnWavesRequested();
+      GameObjectPool gameObjectPool = m_SpawnerConfig.GetGameObjectPool();
+      var spawnIntervalWaiter = new WaitForSeconds(spawnInterval); // WaitForSeconds object to handle the spawn interval delay between spawns.
+      var spawnCycleDelayWaiter = new WaitForSeconds(spawnCycleDelay); // WaitForSeconds object to handle the delay between spawn cycles when repeat spawning is enabled.
 
     // Loop while repeat spawner is true, if repeat spawner is false, this loop will only run once, effectively making it a one time spawn of the specified number of GameObjects.
     do
     {
 
       // Loop to spawn the specified number of GameObjects.
-      for (currentIndex = 0; currentIndex < m_numberOfGameObjectsToSpawn; currentIndex++)
+      for (currentIndex = 0; currentIndex < numOfGameObjsToSpawn; currentIndex++)
       {
 
         // Get a GameObject from the pool and spawn it in the specified direction with the specified spacing.
-        var gameObjectFromPool = m_gameObjectPool.Pool.Get();
+        var gameObjectFromPool = gameObjectPool.Pool.Get();
 
         if (gameObjectFromPool != null)
         {
@@ -362,23 +399,23 @@ public class Spawner : MonoBehaviour
         yield return spawnIntervalWaiter; // Wait for the specified spawn interval before spawning the next GameObject in the line.
 
       }
+      // Update loop variant, used to control the terminating condition.
+      m_numOfCyclesCompleted++;
 
       // Check for the number of cycles completed, if it is equal to the number of cycles to repeat, then set repeat spawn to false to stop the spawning process. This allows for a finite number of spawn cycles if desired, otherwise it will continue indefinitely if repeat spawn is true and no cycle limit is set
-      if(m_numOfCyclesCompleted == m_numOfSpawnWavesRequested)
+      if(m_numOfCyclesCompleted == numOfSpawnWavesRequested)
       {
-        m_repeatSpawn = false; // Set repeat spawn to false to stop the spawning process after the desired number of spawn cycles is completed.
+        repeatSpawn = false; // Set repeat spawn to false to stop the spawning process after the desired number of spawn cycles is completed.
       }
 
       // Wait for the delay between spawn cycles if repeat spawning is enabled before starting the next spawn cycle.
-      if (m_repeatSpawn)
+      if (repeatSpawn)
       {
         yield return spawnCycleDelayWaiter; // Wait for the specified spawn cycle delay before starting the next spawn cycle.
       }
 
-      // Update loop variant, used to control the terminating condition.
-      m_numOfCyclesCompleted++;
 
-    } while (m_repeatSpawn); // Check the repeat spawn condition to determine whether to continue spawning GameObjects in a loop or not.
+    } while (repeatSpawn); // Check the repeat spawn condition to determine whether to continue spawning GameObjects in a loop or not.
                              // Function return stubb
     
       yield return null;
@@ -497,10 +534,10 @@ public class Spawner : MonoBehaviour
     private IEnumerator SpawnGameObjectInBoundaryRoutine(float spawnInterval)
     {
        var waiter = new WaitForSeconds(spawnInterval);
- 
+       GameObjectPool gameObjectPool = m_SpawnerConfig.GetGameObjectPool(); 
        while(true)
        {
-         var gameObjectFromPool = m_gameObjectPool.Pool.Get();
+         var gameObjectFromPool = gameObjectPool.Pool.Get();
          if (gameObjectFromPool != null) 
          { 
            SpawnGameObjectInBoundary(gameObjectFromPool);
@@ -526,7 +563,8 @@ public class Spawner : MonoBehaviour
 
     public List<GameObject> GetActiveGameObjectsFromSpawner()
     {
-       return m_gameObjectPool.GetActiveObjectsInPool();
+       GameObjectPool gameObjectPool = m_SpawnerConfig.GetGameObjectPool();
+       return gameObjectPool.GetActiveObjectsInPool();
     }
 
     public void SpawnGameObjectInBoundary(GameObject gameObjectFromPool)
@@ -541,11 +579,12 @@ public class Spawner : MonoBehaviour
     private Vector3 GetSpawnPositionForObjectInCapsule3DBoundary(GameObject gameObjectFromPool)
     {
       // Declare and initialize variables.
-      var radius = m_circularBoundary.radius;
-      var center = m_circularBoundary.bounds.center;
+      CapsuleCollider circularBoundary = gameObjectFromPool.GetComponent<CapsuleCollider>();
+      var radius = circularBoundary.radius;
+      var center = circularBoundary.bounds.center;
       float xPosition = UnityEngine.Random.Range(center.x-radius,center.x+radius);
       float zPosition = UnityEngine.Random.Range(center.z-radius,center.z+radius);
-      var max = m_circularBoundary.bounds.max;
+      var max = circularBoundary.bounds.max;
       var yPosition = center.y;
 
 
@@ -555,11 +594,13 @@ public class Spawner : MonoBehaviour
     private void OnDrawGizmos()
     {
       // Declare and initialize variables.
+      Transform directionHelper = m_SpawnerConfig.GetDirectionHelper();
+      Transform startingSpawnTransform = m_SpawnerConfig.GetStartingSpawnTransform();
 
-      if(m_directionHelper != null && m_startingSpawnTransform != null)
+      if(directionHelper != null && startingSpawnTransform != null)
       {
         Gizmos.color = Color.red;
-        Gizmos.DrawLine(m_startingSpawnTransform.position, m_directionHelper.position);
+        Gizmos.DrawLine(startingSpawnTransform.position, directionHelper.position);
       }
     }
 
