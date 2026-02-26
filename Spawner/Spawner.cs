@@ -1,7 +1,7 @@
 /*
  Author: Gary Lougheed
  Date Created: ~2/08/2026
- Last Edit: ~2/24/2026 - by Gary Lougheed
+ Last Edit: ~2/26/2026 - by Gary Lougheed
  Version: 3
  Dependencies: GameObjectPool, PooledGameObject
  Description: A generic spawner used to spawn game objects.
@@ -22,27 +22,6 @@ public class Spawner : MonoBehaviour
  
        [Header("Spawner Settings")]
        [SerializeField] SpawnerConfig m_SpawnerConfig;
-       /*[SerializeField] private bool m_repeatSpawn = false; // Whether to repeat the spawning process after the initial spawn.
-       [SerializeField, Range(1,100)] private int  m_numOfSpawnWavesRequested = 1;
-       [SerializeField] private bool m_randomizeSpawnDelay = false;
-       [SerializeField] private bool m_randomizeSpawnCycleDelay = false;
-       [SerializeField] private float m_SpawnCycleDelay = 5f; // Time delay between spawn cycles if repeatSpawn is true.
-       [SerializeField, Range(0.0f,3f)] private float m_spawnInterval = 1f; // Time interval between spawns in seconds
-       [SerializeField] float m_spacing = 2f; // Minimum distance between spawned GameObjects
-       [SerializeField] private int m_numberOfGameObjectsToSpawn = 10; // Total number of GameObjects to spawn
-       [SerializeField] Vector3 m_spawningDirection;
-       //[SerializeField] ISpawnPositionDesignator m_SpawnPositionDesignator;
-
-       [SerializeField] GameObjectPool m_gameObjectPool;
-       //[SerializeField] Bounds m_boundary;
-       [SerializeField] CapsuleCollider m_circularBoundary;
-       [SerializeField] Collider2D m_spawnRegion2D;
-       [SerializeField] Collider m_spawnRegion3D;
-       //[SerializeField] List<WayPoints>
-       [SerializeField] List<Transform> m_spawnPoints;
-       [SerializeField] Transform m_startingSpawnTransform;
-       [SerializeField] Transform m_directionHelper; // Helper transform to visualize the spawning direction in the editor
-       */
        [Header("Transformation changes are called before OnSpawn")]
        public UnityEvent<GameObject> OnTransformChanges;
        public UnityEvent<GameObject> OnSpawned; // Event to notify when a GameObject is spawned
@@ -66,7 +45,126 @@ public class Spawner : MonoBehaviour
       //StartCoroutine(SpawnGameObjectInBoundaryRoutine(m_spawnInterval)); // Spawn a new GameObject every 1 second (adjust the interval as needed)      
     }
 
-    public void SpawnGameObjectsAlongSpawnPoints()
+    public void SpawnGameObjectsAlongACircleBoundary()
+    {
+      StartCoroutine(SpawnGameObjectsAlongCircleBoundaryRoutine());
+    }
+
+    private IEnumerator SpawnGameObjectsAlongCircleBoundaryRoutine()
+    {
+    // Declare and initialize local variables, specific to the SpawnGameObjectsRoutine method scope.
+    int currentIndex = 0;
+    float spawnInterval = m_SpawnerConfig.GetSpawnInterval();
+    float spawnCycleDelay = m_SpawnerConfig.GetSpawnCycleDelay();
+    float numOfGameObjsToSpawn = m_SpawnerConfig.GetNumberOfGameObjectsToSpawn();
+    bool repeatSpawn = m_SpawnerConfig.GetRepeatSpawn();
+    int numOfSpawnWavesRequested = m_SpawnerConfig.GetNumOfSpawnWavesRequested();
+    GameObjectPool gameObjectPool = m_SpawnerConfig.GetGameObjectPool();
+    var spawnIntervalWaiter = new WaitForSeconds(spawnInterval); // WaitForSeconds object to handle the spawn interval delay between spawns.
+    var spawnCycleDelayWaiter = new WaitForSeconds(spawnCycleDelay); // WaitForSeconds object to handle the delay between spawn cycles when repeat spawning is enabled.
+
+    // Loop while repeat spawner is true, if repeat spawner is false, this loop will only run once, effectively making it a one time spawn of the specified number of GameObjects.
+    do
+    {
+
+      // Loop to spawn the specified number of GameObjects.
+      for (currentIndex = 0; currentIndex < numOfGameObjsToSpawn; currentIndex++)
+      {
+
+        // Get a GameObject from the pool and spawn it in the specified direction with the specified spacing.
+        var gameObjectFromPool = gameObjectPool.Pool.Get();
+
+        if (gameObjectFromPool != null)
+        {
+
+          // Transformation changes
+          OnTransformChanges?.Invoke(gameObjectFromPool);
+
+          // Get a random position in the region provided, check to see if there is an object there, if so find a new random spot in the region.
+          gameObjectFromPool.transform.position = GetSpawnPointFromCapsuleCollider();
+
+          OnSpawned?.Invoke(gameObjectFromPool); // Invoke the OnSpawned event to notify subscribers that a GameObject has been spawned
+        }
+
+        // Wait for the specified spawn interval before spawning the next GameObject in the line.
+        yield return spawnIntervalWaiter; // Wait for the specified spawn interval before spawning the next GameObject in the line.
+
+      }
+
+      // Check for the number of cycles completed, if it is equal to the number of cycles to repeat, then set repeat spawn to false to stop the spawning process. This allows for a finite number of spawn cycles if desired, otherwise it will continue indefinitely if repeat spawn is true and no cycle limit is set
+      if (m_numOfCyclesCompleted == numOfSpawnWavesRequested)
+      {
+        repeatSpawn = false; // Set repeat spawn to false to stop the spawning process after the desired number of spawn cycles is completed.
+      }
+
+      // Wait for the delay between spawn cycles if repeat spawning is enabled before starting the next spawn cycle.
+      if (repeatSpawn)
+      {
+        yield return spawnCycleDelayWaiter; // Wait for the specified spawn cycle delay before starting the next spawn cycle.
+      }
+
+      // Update loop variant, used to control the terminating condition.
+      m_numOfCyclesCompleted++;
+
+      // In case the config goes wrong, this should prevent a crash.
+      yield return null;
+
+    } while (repeatSpawn); // Check the repeat spawn condition to determine whether to continue spawning GameObjects in a loop or not.
+                           // Function return stubb
+
+      yield return null;
+  
+    }
+
+    private Vector3 GetSpawnPointFromCapsuleCollider()
+    {
+
+       // Declare and initialize variables
+       var capsuleCollider = m_SpawnerConfig.GetCircularBoundary();
+       float radius = 0f;
+       float randAngle = 0f;
+       float xPos = 0f;
+       float yPos = 0f;
+       Vector3 center = Vector3.zero;
+       Vector3 randomPoint = Vector3.zero;
+
+       // Check if the capsule collider is assigned to the spawner config, if not log an error and return a default position to prevent a crash.
+       if( capsuleCollider == null)
+       {
+         Debug.LogError("GameObject: " + this.name + " has no CapsuleCollider assigned to spawner config for spawning along a circular boundary! ");
+         return Vector3.zero;
+       }
+
+       // Initialize the radius and center variables based on the capsule collider's properties.
+         radius = capsuleCollider.radius;
+         center = capsuleCollider.transform.position;
+     
+
+       // Get a random point on the edge of the circular boundary defined by the capsule collider. 
+       
+          // Generate a random angle
+            randAngle = UnityEngine.Random.Range(0f,360f) * Mathf.Deg2Rad; // Convert to radians
+
+          // Get a random x from the unit circle.
+          // x = cos(0) => cos(0) = x / r => x' = r * cos(0)
+            xPos = Mathf.Cos(randAngle) * radius;
+
+          // Get a random y from the unit circle. y = sin(0)
+          // sin(0) = y / r => y' = r * sin(0)
+            yPos = Mathf.Sin(randAngle) * radius;
+
+
+    // Set the random to be the center of the capsule collider plus the random x and y positions calculated from
+      // the unit circle multiplied by the radius to get a random point along the edge of the circular boundary
+        // defined by the capsule collider.
+        randomPoint = new Vector3(center.x + xPos, center.y, center.z + yPos);
+
+    // Return the randompoint
+    return randomPoint;
+
+  }
+
+  public void SpawnGameObjectsAlongSpawnPoints()
     {
       StartCoroutine(SpawnGameObjectsAlongSpawnPointsRoutine());
     }
@@ -144,7 +242,7 @@ public class Spawner : MonoBehaviour
       return spawnPoints[index % spawnPoints.Count].position; // Loop through spawn points if index exceeds the list count
   }
 
-  public void SpawnGameObjectsIn3DBoxRegion()
+    public void SpawnGameObjectsIn3DBoxRegion()
     {
       StartCoroutine(SpawnGameObjectsIn3DBoxRegionRoutine());
     }
@@ -260,7 +358,6 @@ public class Spawner : MonoBehaviour
 
     randomPosition = new Vector3(xPos, yPos, zPos);
 
-    Debug.Log("Random position sent: " + randomPosition);
 
     // Function stub
     return randomPosition;
@@ -488,7 +585,7 @@ public class Spawner : MonoBehaviour
     {
       if (!gameObj.TryGetComponent(out Collider collider))
       {
-        Debug.LogError("Spawner unable to spawn correctly — no Collider detected.");
+        Debug.LogError("Spawner unable to spawn correctly ï¿½ no Collider detected.");
         return false;
       }
 
