@@ -2,7 +2,7 @@
  Author: Gary Lougheed
  Date Created: ~2/08/2026
  Last Edit: ~2/26/2026 - by Gary Lougheed
- Version: 3
+ Version: 4
  Dependencies: GameObjectPool, PooledGameObject
  Description: A generic spawner used to spawn game objects.
 */
@@ -27,14 +27,13 @@ public class Spawner : MonoBehaviour
        public UnityEvent<GameObject> OnSpawned; // Event to notify when a GameObject is spawned
        public UnityEvent OnStartSpawner;
        public UnityEvent<List<GameObject>> OnFinishedSpawning;
-       private int m_numOfCyclesCompleted = 0;
 
     private void Start()
     {
       
       if ( m_SpawnerConfig.GetGameObjectPool() == null)
       {
-        Debug.LogError("No GameObjectPool assigned to spawner!");
+        Debug.LogError("This gameObject: " + this.name + "has no GameObjectPool assigned to spawner!");
         return;
       }
 
@@ -59,7 +58,9 @@ public class Spawner : MonoBehaviour
     float numOfGameObjsToSpawn = m_SpawnerConfig.GetNumberOfGameObjectsToSpawn();
     bool repeatSpawn = m_SpawnerConfig.GetRepeatSpawn();
     int numOfSpawnWavesRequested = m_SpawnerConfig.GetNumOfSpawnWavesRequested();
+    int numOfCyclesCompleted = 0;
     GameObjectPool gameObjectPool = m_SpawnerConfig.GetGameObjectPool();
+ 
     var spawnIntervalWaiter = new WaitForSeconds(spawnInterval); // WaitForSeconds object to handle the spawn interval delay between spawns.
     var spawnCycleDelayWaiter = new WaitForSeconds(spawnCycleDelay); // WaitForSeconds object to handle the delay between spawn cycles when repeat spawning is enabled.
 
@@ -92,7 +93,7 @@ public class Spawner : MonoBehaviour
       }
 
       // Check for the number of cycles completed, if it is equal to the number of cycles to repeat, then set repeat spawn to false to stop the spawning process. This allows for a finite number of spawn cycles if desired, otherwise it will continue indefinitely if repeat spawn is true and no cycle limit is set
-      if (m_numOfCyclesCompleted == numOfSpawnWavesRequested)
+      if (numOfCyclesCompleted == numOfSpawnWavesRequested)
       {
         repeatSpawn = false; // Set repeat spawn to false to stop the spawning process after the desired number of spawn cycles is completed.
       }
@@ -104,7 +105,7 @@ public class Spawner : MonoBehaviour
       }
 
       // Update loop variant, used to control the terminating condition.
-      m_numOfCyclesCompleted++;
+      numOfCyclesCompleted++;
 
       // In case the config goes wrong, this should prevent a crash.
       yield return null;
@@ -178,6 +179,7 @@ public class Spawner : MonoBehaviour
       float numOfGameObjsToSpawn = m_SpawnerConfig.GetNumberOfGameObjectsToSpawn();
       bool repeatSpawn = m_SpawnerConfig.GetRepeatSpawn();
       int numOfSpawnWavesRequested = m_SpawnerConfig.GetNumOfSpawnWavesRequested();
+      int numOfCyclesCompleted = 0;
       GameObjectPool gameObjectPool = m_SpawnerConfig.GetGameObjectPool();
       var spawnIntervalWaiter = new WaitForSeconds(spawnInterval); // WaitForSeconds object to handle the spawn interval delay between spawns.
       var spawnCycleDelayWaiter = new WaitForSeconds(spawnCycleDelay); // WaitForSeconds object to handle the delay between spawn cycles when repeat spawning is enabled.
@@ -209,9 +211,11 @@ public class Spawner : MonoBehaviour
         yield return spawnIntervalWaiter; // Wait for the specified spawn interval before spawning the next GameObject in the line.
 
       }
+      // Update loop variant, used to control the terminating condition.
+      numOfCyclesCompleted++;
 
       // Check for the number of cycles completed, if it is equal to the number of cycles to repeat, then set repeat spawn to false to stop the spawning process. This allows for a finite number of spawn cycles if desired, otherwise it will continue indefinitely if repeat spawn is true and no cycle limit is set
-      if (m_numOfCyclesCompleted == numOfSpawnWavesRequested)
+      if (numOfCyclesCompleted == numOfSpawnWavesRequested)
       {
         repeatSpawn = false; // Set repeat spawn to false to stop the spawning process after the desired number of spawn cycles is completed.
       }
@@ -222,8 +226,6 @@ public class Spawner : MonoBehaviour
         yield return spawnCycleDelayWaiter; // Wait for the specified spawn cycle delay before starting the next spawn cycle.
       }
 
-      // Update loop variant, used to control the terminating condition.
-      m_numOfCyclesCompleted++;
 
     } while (repeatSpawn); // Check the repeat spawn condition to determine whether to continue spawning GameObjects in a loop or not.
                              // Function return stubb
@@ -256,6 +258,7 @@ public class Spawner : MonoBehaviour
     float numOfGameObjsToSpawn = m_SpawnerConfig.GetNumberOfGameObjectsToSpawn();
     bool repeatSpawn = m_SpawnerConfig.GetRepeatSpawn();
     int numOfSpawnWavesRequested = m_SpawnerConfig.GetNumOfSpawnWavesRequested();
+    int numOfCyclesCompleted = 0;
     GameObjectPool gameObjectPool = m_SpawnerConfig.GetGameObjectPool();
     Collider spawnRegion3D = m_SpawnerConfig.GetSpawnRegion3D();
     var spawnIntervalWaiter = new WaitForSeconds(spawnInterval); // WaitForSeconds object to handle the spawn interval delay between spawns.
@@ -290,8 +293,11 @@ public class Spawner : MonoBehaviour
 
         }
 
+        // Update loop variant, used to control the terminating condition.
+        numOfCyclesCompleted++;
+
         // Check for the number of cycles completed, if it is equal to the number of cycles to repeat, then set repeat spawn to false to stop the spawning process. This allows for a finite number of spawn cycles if desired, otherwise it will continue indefinitely if repeat spawn is true and no cycle limit is set
-        if (m_numOfCyclesCompleted == numOfSpawnWavesRequested)
+        if (numOfCyclesCompleted == numOfSpawnWavesRequested)
         {
           repeatSpawn = false; // Set repeat spawn to false to stop the spawning process after the desired number of spawn cycles is completed.
         }
@@ -302,8 +308,6 @@ public class Spawner : MonoBehaviour
           yield return spawnCycleDelayWaiter; // Wait for the specified spawn cycle delay before starting the next spawn cycle.
         }
 
-        // Update loop variant, used to control the terminating condition.
-        m_numOfCyclesCompleted++;
 
       } while (repeatSpawn); // Check the repeat spawn condition to determine whether to continue spawning GameObjects in a loop or not.
                                // Function return stubb
@@ -387,6 +391,7 @@ public class Spawner : MonoBehaviour
     float numOfGameObjsToSpawn = m_SpawnerConfig.GetNumberOfGameObjectsToSpawn();
     bool repeatSpawn = m_SpawnerConfig.GetRepeatSpawn();
     int numOfSpawnWavesRequested = m_SpawnerConfig.GetNumOfSpawnWavesRequested();
+    int numOfCyclesCompleted = 0;
     GameObjectPool gameObjectPool = m_SpawnerConfig.GetGameObjectPool();
     var spawnIntervalWaiter = new WaitForSeconds(spawnInterval); // WaitForSeconds object to handle the spawn interval delay between spawns.
     var spawnCycleDelayWaiter = new WaitForSeconds(spawnCycleDelay); // WaitForSeconds object to handle the delay between spawn cycles when repeat spawning is enabled.
@@ -420,8 +425,11 @@ public class Spawner : MonoBehaviour
 
       }
 
+      // Update loop variant, used to control the terminating condition.
+      numOfCyclesCompleted++;
+
       // Check for the number of cycles completed, if it is equal to the number of cycles to repeat, then set repeat spawn to false to stop the spawning process. This allows for a finite number of spawn cycles if desired, otherwise it will continue indefinitely if repeat spawn is true and no cycle limit is set
-      if (m_numOfCyclesCompleted == numOfSpawnWavesRequested)
+      if (numOfCyclesCompleted == numOfSpawnWavesRequested)
       {
         repeatSpawn = false; // Set repeat spawn to false to stop the spawning process after the desired number of spawn cycles is completed.
       }
@@ -432,8 +440,6 @@ public class Spawner : MonoBehaviour
         yield return spawnCycleDelayWaiter; // Wait for the specified spawn cycle delay before starting the next spawn cycle.
       }
 
-      // Update loop variant, used to control the terminating condition.
-      m_numOfCyclesCompleted++;
 
     } while (repeatSpawn); // Check the repeat spawn condition to determine whether to continue spawning GameObjects in a loop or not.
                              // Function return stubb
@@ -464,11 +470,13 @@ public class Spawner : MonoBehaviour
       Transform startingSpawnTransform = m_SpawnerConfig.GetStartingSpawnTransform();
       Vector3 startingPosition = startingSpawnTransform.position; // Starting position for spawning GameObjects, set in the Unity Editor
       int currentIndex = 0;
+      int numOfCyclesCompleted = 0;
       float spawnInterval = m_SpawnerConfig.GetSpawnInterval();
       float spawnCycleDelay = m_SpawnerConfig.GetSpawnCycleDelay();
       float numOfGameObjsToSpawn = m_SpawnerConfig.GetNumberOfGameObjectsToSpawn();
       bool repeatSpawn = m_SpawnerConfig.GetRepeatSpawn();
       int numOfSpawnWavesRequested = m_SpawnerConfig.GetNumOfSpawnWavesRequested();
+      
       GameObjectPool gameObjectPool = m_SpawnerConfig.GetGameObjectPool();
       var spawnIntervalWaiter = new WaitForSeconds(spawnInterval); // WaitForSeconds object to handle the spawn interval delay between spawns.
       var spawnCycleDelayWaiter = new WaitForSeconds(spawnCycleDelay); // WaitForSeconds object to handle the delay between spawn cycles when repeat spawning is enabled.
@@ -497,10 +505,10 @@ public class Spawner : MonoBehaviour
 
       }
       // Update loop variant, used to control the terminating condition.
-      m_numOfCyclesCompleted++;
+      numOfCyclesCompleted++;
 
       // Check for the number of cycles completed, if it is equal to the number of cycles to repeat, then set repeat spawn to false to stop the spawning process. This allows for a finite number of spawn cycles if desired, otherwise it will continue indefinitely if repeat spawn is true and no cycle limit is set
-      if(m_numOfCyclesCompleted == numOfSpawnWavesRequested)
+      if(numOfCyclesCompleted == numOfSpawnWavesRequested)
       {
         repeatSpawn = false; // Set repeat spawn to false to stop the spawning process after the desired number of spawn cycles is completed.
       }
@@ -585,7 +593,7 @@ public class Spawner : MonoBehaviour
     {
       if (!gameObj.TryGetComponent(out Collider collider))
       {
-        Debug.LogError("Spawner unable to spawn correctly ï¿½ no Collider detected.");
+        Debug.LogError("Spawner unable to spawn correctly — no Collider detected.");
         return false;
       }
 
