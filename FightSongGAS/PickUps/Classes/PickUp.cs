@@ -16,9 +16,10 @@ namespace FightSongGameLogicSystem
          
          if (unit != null) 
          {
-           Debug.Log("Trigger entered by: " + gameObject.name);
+           Debug.Log("Trigger entered by: " + other.gameObject.name);
            m_targets.Add(other.gameObject);
            m_abilityRunner.UseAbility(m_targets);
+           m_targets.Clear();
          }
          //Destroy(this.gameObject);
       }

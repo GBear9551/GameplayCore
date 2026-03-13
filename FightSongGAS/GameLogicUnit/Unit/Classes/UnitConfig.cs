@@ -6,13 +6,20 @@ namespace FightSongGameLogicSystem
     public class UnitConfig : ScriptableObject 
     {
 
-      [SerializeField] private float m_Speed;
+      [SerializeField] private float m_baseGroundSpeed;
+      [SerializeField] private int m_MaxHealthPoints;
+
+
+      public int GetMaxHealthPointsAmount()
+      {
+        return m_MaxHealthPoints; 
+      }
 
       public float GetSpeed()
       {
         // To avoid a cached speed, we can compute the speed here everytime
         // and process foreach( IBuff where buff is IMovementModifier)
-        return m_Speed; 
+        return m_baseGroundSpeed; 
       }
 
     }

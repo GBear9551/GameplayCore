@@ -7,8 +7,8 @@ namespace FightSongGameLogicSystem
   public abstract class Modifier: MonoBehaviour, IModifier
   {
 
-    GameObject m_From;
-    List<GameObject> m_Targets;
+    protected GameObject m_From;
+    protected List<GameObject> m_Targets;
 
     // async remove modifier from targets after delay
 
@@ -34,19 +34,21 @@ namespace FightSongGameLogicSystem
         return false;
       }
 
-      m_Targets = targets;
+      m_Targets = new List<GameObject>(targets);
       return true;
     }
 
-    public virtual void Apply()
+    public virtual bool Apply()
     {
       Debug.Log("Derived class did not implement base class Buff function Apply() from " + gameObject.name);
+      return false;
     }
 
-    public virtual void Remove()
+    public virtual bool Remove()
     {
 
       Debug.Log("Derived class did not implement base class Buff function Remove() from " + gameObject.name);
+      return false;
     }
   }
 }

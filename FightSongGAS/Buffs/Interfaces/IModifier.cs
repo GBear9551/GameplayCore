@@ -6,7 +6,7 @@ namespace FightSongGameLogicSystem
 {
     public interface IModifier
     {
-       void Apply();
-       void Remove();
+       bool Apply();
+       bool Remove();
     }
 }

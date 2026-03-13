@@ -4,23 +4,14 @@ namespace FightSongGameLogicSystem
 {
     public class MovementModifier : Modifier 
     {
-       [SerializeField] private float m_MovementSpeed;
+       [SerializeField] private float m_MovementSpeedModifier;
 
        public float GetMovementModifier()
        {
-         return m_MovementSpeed;
+         return m_MovementSpeedModifier;
        }
 
 
-       public override void Apply()
-       {
-           
-       }
-
-       public override void Remove()
-       {
-
-       }
       
        
     }

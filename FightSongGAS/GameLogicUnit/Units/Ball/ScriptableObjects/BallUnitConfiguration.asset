@@ -12,4 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2acae70073607b14bb75d8f5e8345c6a, type: 3}
   m_Name: BallUnitConfiguration
   m_EditorClassIdentifier: Assembly-CSharp::FightSongGameLogicSystem.UnitConfig
-  m_Speed: 15
+  m_baseGroundSpeed: 15
+  m_MaxHealthPoints: 5

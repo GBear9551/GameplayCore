@@ -5,9 +5,20 @@ namespace FightSongGameLogicSystem
 {
     public abstract class Ability : MonoBehaviour, IAbility
     {
-      public virtual void Use(GameObject gameObj, List<GameObject> targets)
+      public virtual void Use(GameObject from, List<GameObject> targets)
       {
-        Debug.Log("Derived class doesn't override abstract class Ability Function: Use(GameObject gamObj, List<ITargetable> targets) from: " + gameObject.name);
+        
+         string targetsString = string.Empty;
+
+         if(targets != null)
+         {
+           foreach(GameObject target in targets) 
+           {
+              targetsString += target.gameObject.name + " ";
+           }
+         }  
+
+         Debug.Log("Ability: " + this.name + "Source of Ability: " + this.gameObject.name + "Ability targets: " + targetsString);
       }
 
      }
