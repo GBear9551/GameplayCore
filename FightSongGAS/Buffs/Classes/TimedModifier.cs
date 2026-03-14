@@ -16,6 +16,7 @@ namespace FightSongGameLogicSystem
 
     public virtual void Initialize()
     {
+      Debug.Log(this.name + this.GetInstanceID().ToString() + " from: " + m_From + "has " + GetCurrentDurationRemaining() + "time remaining.");
       m_CurrDuration = m_TotalDuration;
       m_IsModifierActive = true;
     }
@@ -34,7 +35,7 @@ namespace FightSongGameLogicSystem
     }
 
     // Update is called once per frame
-    void Update()
+    protected virtual void Update()
     {
 
       if (m_IsModifierActive)
@@ -46,11 +47,22 @@ namespace FightSongGameLogicSystem
           m_IsModifierActive = false;
 
           Debug.Log("Removing: " + this + "because timed modifier expired. GOName: " + gameObject.name);
-
           // Remove timedModifier
           if(Remove() == false)
           {
             Debug.LogError("Attempted to remove a modifier that was not registered to a unit. Class TimedModifier(), Func: Update()");
+          }
+          foreach(var target in m_Targets)
+          {
+            var unit = target.GetComponent<Unit>();
+            if(unit != null)
+            {
+              var timedModifiers = unit.m_Modifiers.OfType<TimedModifier>();
+              if(timedModifiers != null)
+              {
+                Debug.Log("The unit: " + unit.gameObject.name + "has this many timed modifiers on it: " + timedModifiers.Count().ToString());
+              }
+            }
           }
 
           if (m_Targets != null)
@@ -62,6 +74,10 @@ namespace FightSongGameLogicSystem
 
     }
     
+    public float GetCurrentDurationRemaining()
+    { 
+      return m_CurrDuration; 
+    }
 
     public override bool Remove()
     {

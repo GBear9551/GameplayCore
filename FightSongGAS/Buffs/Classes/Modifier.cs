@@ -40,14 +40,20 @@ namespace FightSongGameLogicSystem
 
     public virtual bool Apply()
     {
-      Debug.Log("Derived class did not implement base class Buff function Apply() from " + gameObject.name);
+      Debug.Log("Derived class did not implement base class Modifier function Apply() from " + gameObject.name);
       return false;
     }
 
     public virtual bool Remove()
     {
 
-      Debug.Log("Derived class did not implement base class Buff function Remove() from " + gameObject.name);
+      Debug.Log("Derived class did not implement base class Modifier function Remove() from " + gameObject.name);
+      return false;
+    }
+
+    public virtual bool Refresh()
+    {
+      Debug.Log("Derived class did not implement base class Modifier function Refresh() from " + gameObject.name);
       return false;
     }
   }

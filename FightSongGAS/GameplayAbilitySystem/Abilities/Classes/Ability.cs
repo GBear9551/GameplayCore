@@ -5,6 +5,12 @@ namespace FightSongGameLogicSystem
 {
     public abstract class Ability : MonoBehaviour, IAbility
     {
+
+
+      [SerializeField] protected Effect OnCastEffect;
+
+      
+
       public virtual void Use(GameObject from, List<GameObject> targets)
       {
         
@@ -18,7 +24,7 @@ namespace FightSongGameLogicSystem
            }
          }  
 
-         Debug.Log("Ability: " + this.name + "Source of Ability: " + this.gameObject.name + "Ability targets: " + targetsString);
+         Debug.Log("Ability: " + this.name + " Source of Ability: " + this.gameObject.name + " Ability targets: " + targetsString);
       }
 
      }

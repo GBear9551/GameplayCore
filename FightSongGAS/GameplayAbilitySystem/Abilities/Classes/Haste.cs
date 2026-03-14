@@ -10,6 +10,12 @@ namespace FightSongGameLogicSystem
         
        public override void Use(GameObject from, List<GameObject> targets)
        {
+
+           if(OnCastEffect != null)
+           { 
+             OnCastEffect.PlaySFX();
+             OnCastEffect.PlayVFX();
+           }
            if(m_MovementSpeedBuff != null)
            { 
              m_MovementSpeedBuff.SetFrom(from);

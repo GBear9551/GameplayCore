@@ -19,7 +19,7 @@ namespace FightSongGameLogicSystem
 
     public virtual int GetHealth()
     {
-       return m_UnitConfig.GetMaxHealthPointsAmount();  
+       return m_currentHealth;  
     }
 
     public virtual float GetSpeed()
@@ -93,9 +93,6 @@ namespace FightSongGameLogicSystem
     // Base functionality for a unit receiving damage.
     public int TakeDamage(int baseDamageToApply, GameObject damageSource)
     {
-
-       
-
        // Declare and initialize variables
         int totalDamage = 0;
         int modifiedDamage = 0;
@@ -107,7 +104,7 @@ namespace FightSongGameLogicSystem
       // If current health is zero don't take damage.
         if (m_currentHealth == 0) return 0;
 
-      // If unit is invulnerable, take no damage
+      // If unit is invulnerable, take no damage, TODO: remove captured data, use calculation to avoid cache-invalidation.
       bool cap = m_Modifiers.OfType<InvulnerabilityModifier>().Any();
       if (cap)
       {
