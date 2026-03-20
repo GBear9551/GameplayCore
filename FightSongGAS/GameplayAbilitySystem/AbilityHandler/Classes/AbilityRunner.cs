@@ -6,7 +6,7 @@ namespace FightSongGameLogicSystem
     public class AbilityRunner : MonoBehaviour
     {
 
-       [SerializeField] List<Ability> m_Ability;
+       [SerializeField] List<AbstractAbility> m_Ability;
 
        public void UseAbility(List<GameObject> targets)
        {
@@ -14,7 +14,11 @@ namespace FightSongGameLogicSystem
           { 
             foreach (var ability in m_Ability)
             {
-              ability.Use(this.gameObject, targets);
+
+              List<IModifier> modifiersCreated = ability.Use(this.gameObject, targets);
+              
+              // TODO: Add modifiersCreated to the modifiers created by the ability runner. 
+
             }
           }
        }

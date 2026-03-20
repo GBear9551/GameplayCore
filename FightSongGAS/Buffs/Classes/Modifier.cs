@@ -4,7 +4,9 @@ using System.Collections.Generic;
 
 namespace FightSongGameLogicSystem
 {
-  public abstract class Modifier: MonoBehaviour, IModifier
+
+  // Can/should this be a serialized struct? Think of serializing classes and structs to gain that inspector access. Monobehaviours are composed of Serializable Objects. 
+  public abstract class Modifier: IModifier
   {
 
     protected GameObject m_From;
@@ -12,12 +14,18 @@ namespace FightSongGameLogicSystem
 
     // async remove modifier from targets after delay
 
+
+    public GameObject GetFrom() 
+    { 
+      return m_From; 
+    }
+
     public virtual bool SetFrom(GameObject from)
     {
 
        if (from == null)
        { 
-          Debug.LogError("A buff must be delievered from some gameobject. Base Class SetFrom()" + gameObject.name);
+          Debug.LogError("A buff must be delievered from some gameobject. Base Class SetFrom()" + from.name);
           return false;
        }
 
@@ -30,7 +38,7 @@ namespace FightSongGameLogicSystem
 
       if (targets == null)
       {
-        Debug.LogError("A buff must be delievered from some gameobject. Base Class SetFrom()" + gameObject.name);
+        Debug.LogError("A buff must be delievered from some gameobject. Base Class SetFrom()" + m_From.name);
         return false;
       }
 
@@ -38,22 +46,53 @@ namespace FightSongGameLogicSystem
       return true;
     }
 
+
+
+
     public virtual bool Apply()
     {
-      Debug.Log("Derived class did not implement base class Modifier function Apply() from " + gameObject.name);
+      Debug.Log("Derived class did not implement base class Modifier function Apply() from " + m_From.name);
       return false;
     }
 
     public virtual bool Remove()
     {
 
-      Debug.Log("Derived class did not implement base class Modifier function Remove() from " + gameObject.name);
+      // Declare and initialize variables.
+
+      // If we have valid targets
+      if(m_Targets != null)
+      { 
+
+        // Check each target
+        foreach (GameObject target in m_Targets) 
+        {
+
+          // if that target is a unit
+          if (target.TryGetComponent<Unit>(out var unit))
+          {
+
+            // Check to see if the unit has a valid modifer list
+            if (unit.m_Modifiers != null)
+            {
+                // Remove this current modifier from the list of modifiers.
+                unit.m_Modifiers.Remove(this);
+            }
+
+          }
+
+        }
+
+      }
+
+
+      Debug.Log("Derived class did not implement base class Modifier function Remove() from " + m_From.name);
       return false;
     }
 
     public virtual bool Refresh()
     {
-      Debug.Log("Derived class did not implement base class Modifier function Refresh() from " + gameObject.name);
+      Debug.Log("Derived class did not implement base class Modifier function Refresh() from " + m_From.name);
       return false;
     }
   }

@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace FightSongGameLogicSystem
 {
-  public class TimedModifier : Modifier
+  public class TimedModifier : MonoBehaviourModifier
   {
     protected float m_TotalDuration;
     public UnityEvent<List<GameObject>> OnModifierExpiredEvent;

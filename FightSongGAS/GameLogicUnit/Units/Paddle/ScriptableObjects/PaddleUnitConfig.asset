@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2acae70073607b14bb75d8f5e8345c6a, type: 3}
-  m_Name: BallUnitConfiguration
+  m_Name: PaddleUnitConfig
   m_EditorClassIdentifier: Assembly-CSharp::FightSongGameLogicSystem.UnitConfig
-  m_BaseGroundSpeed: 0.33
+  m_BaseGroundSpeed: 0
   m_MaxHealthPoints: 5
-  m_MaxAllowedSize: {x: 0, y: 0, z: 0}
-  m_MinAllowedSize: {x: 0, y: 0, z: 0}
+  m_MaxAllowedSize: {x: 10, y: 10, z: 10}
+  m_MinAllowedSize: {x: 0.1, y: 0.1, z: 0.1}

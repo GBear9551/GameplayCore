@@ -8,6 +8,7 @@ namespace FightSongGameLogicSystem
     public interface IAbility
     {
         //List<ITargetable> m_Targets;
-        void Use(GameObject gameObj, List<GameObject> targets);
+        List<IModifier> Use(GameObject gameObj, List<GameObject> targets);
+        bool AbilitySOConfigCheck<T>();
     }
 }

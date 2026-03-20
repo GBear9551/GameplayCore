@@ -4,13 +4,19 @@ using System.Collections.Generic;
 
 namespace FightSongGameLogicSystem 
 {
-    public class DealDirectDamage : Ability
+    public class DealDirectDamage : AbstractAbility
     {
 
        [SerializeField] int m_DamageAmount;
        [SerializeField] List<DamageModifier> m_DamageModifiers;
 
-      public override void Use(GameObject from, List<GameObject> targets)
+
+    public void Start()
+    {
+        bool isUsingCorrectAbilityConfig = AbilitySOConfigCheck<DirectDamageAbilityConfigSO>();       
+    }
+
+      public override List<IModifier> Use(GameObject from, List<GameObject> targets)
       {
         if (targets != null)
         {
@@ -23,7 +29,7 @@ namespace FightSongGameLogicSystem
             {
               if (targetIsAUnit.m_Modifiers == null)
               {
-                targetIsAUnit.m_Modifiers = new List<IModifier>();
+                targetIsAUnit.m_Modifiers = new LinkedList<IModifier>();
               }
 
               if (m_DamageModifiers != null)
@@ -32,7 +38,7 @@ namespace FightSongGameLogicSystem
                 {
                   damageModifier.SetFrom(from);
                   damageModifier.SetTargets(targets);
-                  targetIsAUnit.m_Modifiers.Add(damageModifier);
+                  targetIsAUnit.m_Modifiers.AddLast(damageModifier);
                 }
               }
 
@@ -47,6 +53,9 @@ namespace FightSongGameLogicSystem
         {
           Debug.LogError(" No targets to heal, targets is referencing a null, Class Heal, Function: Use() Derived Class from base Class Ability. Object: " + gameObject.name);
         }
+
+        return base.Use(from, targets);
+
       }
 
 

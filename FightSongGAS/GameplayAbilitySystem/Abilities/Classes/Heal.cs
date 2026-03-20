@@ -3,13 +3,18 @@ using UnityEngine;
 
 namespace FightSongGameLogicSystem 
 {
-    public class Heal : Ability
+    public class Heal : AbstractAbility
     {
 
        [SerializeField] int m_HealAmount;
        [SerializeField] List<HealModifier> m_HealModifiers;
 
-        public override void Use(GameObject from, List<GameObject> targets)
+        public void Start()
+        {
+            bool isUsingCorrectAbilityConfig = AbilitySOConfigCheck<HealAbilityConfigSO>();       
+        }
+
+        public override List<IModifier> Use(GameObject from, List<GameObject> targets)
         {
           if (targets != null)
           {
@@ -22,7 +27,7 @@ namespace FightSongGameLogicSystem
               {
                 if (targetIsAUnit.m_Modifiers == null)
                 {
-                  targetIsAUnit.m_Modifiers = new List<IModifier>();
+                  targetIsAUnit.m_Modifiers = new LinkedList<IModifier>();
                 }
 
                 if(m_HealModifiers != null)
@@ -31,7 +36,7 @@ namespace FightSongGameLogicSystem
                   { 
                     healModifier.SetFrom(from);
                     healModifier.SetTargets(targets);
-                    targetIsAUnit.m_Modifiers.Add(healModifier);
+                    targetIsAUnit.m_Modifiers.AddLast(healModifier);
                   }
                 }
                     targetIsAUnit.Heal( m_HealAmount, this.gameObject );
@@ -45,6 +50,9 @@ namespace FightSongGameLogicSystem
           {
             Debug.LogError( " No targets to heal, targets is referencing a null, Class Heal, Function: Use() Derived Class from base Class Ability. Object: " + gameObject.name);
           }
+
+          return base.Use(from, targets);
+
         }
 
   }

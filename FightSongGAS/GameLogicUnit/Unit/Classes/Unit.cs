@@ -8,7 +8,7 @@ namespace FightSongGameLogicSystem
 {
   public abstract class Unit : MonoBehaviour, IUnit
   {
-    public List<IModifier> m_Modifiers = new List<IModifier>();
+    public LinkedList<IModifier> m_Modifiers = new LinkedList<IModifier>();
     public GameObject Target => null;
     public UnitConfig m_UnitConfig;
 
@@ -16,6 +16,7 @@ namespace FightSongGameLogicSystem
 
     public UnityEvent<GameObject> OnDeath;
 
+    
 
     public virtual int GetHealth()
     {
@@ -47,6 +48,19 @@ namespace FightSongGameLogicSystem
       
     }
 
+    public virtual bool Die()
+    {
+      // Declare and initialize variables
+
+      // Clear modifiers on death unless its ondeath modifier
+
+      // Clearing all modifiers for current implementation
+      m_Modifiers.Clear();
+
+
+      // function stubb
+      return true;
+    }
 
     // Base functionality for a unit receiving a heal.
     public int Heal(int amountToHealBy, GameObject healingSource)
@@ -180,6 +194,51 @@ namespace FightSongGameLogicSystem
 
 
         return damageDealt;
+    }
+
+    // Base functionality for scaling a unit.
+    public bool SetScale()
+    {
+
+       // Declare and initialize variables
+       Vector3 currentScale = gameObject.transform.localScale;
+       Vector3 newScale = Vector3.zero;
+       Vector3 maxSizeAllowed = m_UnitConfig.GetMaxSizeAllow();
+       Vector3 minimumSizeAllowed = m_UnitConfig.GetMinimumSizeAllowed();
+      Vector3 scalingAmount = Vector3.zero;
+
+       // Compute scaling modifiers
+        if (m_Modifiers != null)
+        {
+          foreach (ScaleModifier scaleModifier in m_Modifiers.OfType<ScaleModifier>())
+          {
+            scalingAmount += scaleModifier.GetModifier();
+          }
+        }
+
+      // Apply computated scaling modifiers to newScale
+        newScale = currentScale + scalingAmount;
+
+      // Constraints, check max and min allowable size for the unit.  
+
+      // Check for max size, probably should be component scale checking, magnitude might ease that for now.
+      if (newScale.magnitude > maxSizeAllowed.magnitude )
+       {
+          newScale = maxSizeAllowed;
+          
+       }
+       else if(newScale.magnitude < minimumSizeAllowed.magnitude ) 
+       {
+          newScale = minimumSizeAllowed;
+       }
+      else
+      {
+        gameObject.transform.localScale = newScale;
+      }
+
+      // Logging
+   
+        return true;
     }
 
     private void Initialization()

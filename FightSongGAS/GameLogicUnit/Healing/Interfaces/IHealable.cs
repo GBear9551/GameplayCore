@@ -2,7 +2,7 @@ using UnityEngine;
 
 using HealthType = System.Int32;
 
-namespace GameDevTV
+namespace FightSongGameLogicSystem 
 {
     public interface IHealable  
     {

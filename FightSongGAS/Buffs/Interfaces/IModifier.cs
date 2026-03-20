@@ -9,5 +9,6 @@ namespace FightSongGameLogicSystem
        bool Apply();
        bool Remove();
        bool Refresh();
+       GameObject GetFrom();
     }
 }

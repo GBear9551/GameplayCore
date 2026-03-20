@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace GameDevTV
+namespace FightSongGameLogicSystem 
 {
     public interface IMoveable 
     {
