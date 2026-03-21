@@ -7,11 +7,11 @@ namespace FightSongGameLogicSystem
   public class DirectDamageAbilityConfigSO : AbstractAbilityConfigSO
   {
 
-    [SerializeField] protected float m_DirectDamageAmount;
+    [SerializeField] protected int m_DirectDamageAmount;
 
     // Enum Type : Fire, Water ... etc
 
-    public float GetDirectDamageAmount()
+    public int GetDirectDamageAmount()
     {
        return m_DirectDamageAmount;
     }

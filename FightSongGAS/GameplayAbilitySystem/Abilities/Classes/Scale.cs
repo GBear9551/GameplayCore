@@ -8,27 +8,27 @@ namespace FightSongGameLogicSystem
   public class Scale : AbstractAbility
   {
 
-    [SerializeField] Vector3 m_BaseScalingAmount;
 
 
-    public void Start()
+    protected override bool ValidateConfig()
     {
-        bool isUsingCorrectAbilityConfig = AbilitySOConfigCheck<ScaleAbilityConfigSO>();       
+      bool isUsingCorrectAbilityConfig = AbilitySOConfigCheck<ScaleAbilityConfigSO>();
+      return isUsingCorrectAbilityConfig;
     }
+
 
     public override List<IModifier> Use(GameObject from, List<GameObject> targets)
     {
 
       // Declare and initialize variables
-      var scalingModifier = new ScaleModifier(m_BaseScalingAmount);
+      var abilityConfiguration = m_AbilityConfigSO as ScaleAbilityConfigSO;
+      var scalingModifier = new ScaleModifier(abilityConfiguration.GetScaleAmount());
 
       // We must have a scaling modifier to apply the scaling ability.
       if (targets != null)
       {
 
         // Check to see if there is a scalingModifer
-        if (scalingModifier != null)
-        {
 
           // Set up who the modifier is from and who the targets of the modifier are.
           scalingModifier.SetFrom(from);
@@ -47,7 +47,8 @@ namespace FightSongGameLogicSystem
 
               // Stacking the same modifier upon cast. If you want the specific potion or scaling ability to not stack, check to see it is already contained in the list.
               // Faciliating stacking.
-              isUnit.m_Modifiers.AddLast(scalingModifier);
+              isUnit.m_Modifiers.AddLast(new ScaleModifier(scalingModifier));
+
             }
 
             // Cast Set scale
@@ -57,12 +58,11 @@ namespace FightSongGameLogicSystem
 
         }
 
-
-      }
       // Base class reporting
       return base.Use(from, targets);
-
+      }
+     
     }
   }
 
-}
+

@@ -14,6 +14,11 @@ namespace FightSongGameLogicSystem
       m_ScalingAmount = scalingAmount;
     }
 
+    public ScaleModifier(ScaleModifier other)
+    {
+      m_ScalingAmount = other.m_ScalingAmount;
+    }
+
     public Vector3 GetModifier()
     {
       return m_ScalingAmount;

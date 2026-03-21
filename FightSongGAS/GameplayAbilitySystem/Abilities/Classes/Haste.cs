@@ -5,59 +5,51 @@ namespace FightSongGameLogicSystem
 {
     public class Haste : AbstractAbility
     {
- 
 
 
-       
-       // Programmer ( data object ), move into function, possibly.
-       MovementModifier m_MovementSpeedBuff;
+      
+
+      protected override bool ValidateConfig()
+      {
+          bool isUsingCorrectAbilityConfig = AbilitySOConfigCheck<HasteAbilityConfigSO>();    
+          return isUsingCorrectAbilityConfig;
+      }
+
+      public override List<IModifier> Use(GameObject from, List<GameObject> targets)
+      {
 
 
-    public void Start()
-    {
-        bool isUsingCorrectAbilityConfig = AbilitySOConfigCheck<HasteAbilityConfigSO>();       
-    }
+          // Programmer ( data object ), 
+          MovementModifier movementSpeedBuff;
 
-    public override List<IModifier> Use(GameObject from, List<GameObject> targets)
-    {
+          // Cast ability configuration
+          var abilityConfig = m_AbilityConfigSO as HasteAbilityConfigSO;
 
+          // Create and initialize movement speed buff using the data from the game designer.
+          movementSpeedBuff = new MovementModifier(abilityConfig.GetMovementSpeedModificationAmount());
 
+          // Set up the movement speed buff/ or debuff if you make haste slow by passing a negative val for movementspeed via config.
+           movementSpeedBuff.SetFrom(from);
+           movementSpeedBuff.SetTargets(targets);
 
-        // Cast ability configuration
-        var abilityConfig = m_AbilityConfigSO as HasteAbilityConfigSO;
-
-        // Create and initialize movement speed buff using the data from the game designer.
-        m_MovementSpeedBuff = new MovementModifier(abilityConfig.GetMovementSpeedModificationAmount());
-
-        // If the constructor worked, then set up the modifier.
-           if(m_MovementSpeedBuff != null)
-           { 
-             m_MovementSpeedBuff.SetFrom(from);
-             m_MovementSpeedBuff.SetTargets(targets);
-
-             foreach(GameObject target in targets)
-             {
-                var isUnit = target.GetComponent<Unit>();
-                if(isUnit != null)
-                {
-                   if(isUnit.m_Modifiers == null)
-                   {
-                      isUnit.m_Modifiers = new LinkedList<IModifier>();
-                   }
-
-                   // Currently we are referencing a single memory space (m_MovementSpeedBuff), need more individualized memory spaces for each modifier added. 
-                   // Stacking the same modifier upon cast. May need to check if the modifier is already in the list, if it is, then we can consider stacking it if stackable.
-                   isUnit.m_Modifiers.AddLast(new MovementModifier(m_MovementSpeedBuff));
-                }
-             }
-
-           }
-           else
+           foreach(GameObject target in targets)
            {
-              Debug.LogError("Movement Speed Buff is referencing a null, Class Haste, Function: Use() Derived Class from base Class Ability. Object: " + gameObject.name);
+              var isUnit = target.GetComponent<Unit>();
+              if(isUnit != null)
+              {
+                 if(isUnit.m_Modifiers == null)
+                 {
+                    isUnit.m_Modifiers = new LinkedList<IModifier>();
+                 }
+
+                 // Currently we are referencing a single memory space (m_MovementSpeedBuff), need more individualized memory spaces for each modifier added. 
+                 // Stacking the same modifier upon cast. May need to check if the modifier is already in the list, if it is, then we can consider stacking it if stackable.
+                 isUnit.m_Modifiers.AddLast(new MovementModifier(movementSpeedBuff));
+              }
            }
 
-           return base.Use(from, targets);
-       }
+
+             return base.Use(from, targets);
+         }
     }
 }

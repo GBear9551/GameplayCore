@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FightSongGameLogicSystem.UnitConfig
   m_BaseGroundSpeed: 0.33
   m_MaxHealthPoints: 5
-  m_MaxAllowedSize: {x: 0, y: 0, z: 0}
-  m_MinAllowedSize: {x: 0, y: 0, z: 0}
+  m_MaxAllowedSize: {x: 5, y: 5, z: 5}
+  m_MinAllowedSize: {x: 0.2, y: 0.2, z: 0.2}

@@ -100,7 +100,11 @@ namespace FightSongGameLogicSystem
 
       amountHealed = m_currentHealth - pastHealth;  
       
-      Debug.Log("Target: " +  gameObject.name + " healed by this amount: " +  amountHealed); 
+      // Report healing done.
+      Debug.Log("Target: " +  gameObject.name + " healed by this amount: " +  amountHealed);
+
+      // Report Sources of healing
+
       return amountHealed; 
     }
 
@@ -205,7 +209,7 @@ namespace FightSongGameLogicSystem
        Vector3 newScale = Vector3.zero;
        Vector3 maxSizeAllowed = m_UnitConfig.GetMaxSizeAllow();
        Vector3 minimumSizeAllowed = m_UnitConfig.GetMinimumSizeAllowed();
-      Vector3 scalingAmount = Vector3.zero;
+       Vector3 scalingAmount = Vector3.zero;
 
        // Compute scaling modifiers
         if (m_Modifiers != null)

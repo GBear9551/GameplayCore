@@ -7,6 +7,18 @@ namespace FightSongGameLogicSystem
 
        [SerializeField] int m_DamageAmount;
 
+
+       
+       public DamageModifier(int damageAmount)
+       {
+          m_DamageAmount= damageAmount;
+       }
+
+       public DamageModifier(DamageModifier damageModifier)
+       {
+          m_DamageAmount = damageModifier.m_DamageAmount;
+       }
+
        public int GetDamageModifier()
        {
           return m_DamageAmount; 

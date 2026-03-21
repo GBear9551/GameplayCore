@@ -5,11 +5,22 @@ namespace FightSongGameLogicSystem
     public class HealModifier : Modifier 
     {
 
-       [SerializeField] private SingleUseModifier<int> m_SingleUseModifier;
+       [SerializeField] private int m_HealAmount;
+
+
+       public HealModifier(int healAmount)
+       {
+          m_HealAmount = healAmount;
+       }
+
+       public HealModifier(HealModifier other)
+       {
+         m_HealAmount = other.m_HealAmount;
+       }
 
        public int GetHealModifier()
        { 
-         return m_SingleUseModifier.GetModifier(); 
+         return m_HealAmount;
        }
 
     }

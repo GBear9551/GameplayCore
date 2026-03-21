@@ -7,20 +7,23 @@ namespace FightSongGameLogicSystem
     public class DealDirectDamage : AbstractAbility
     {
 
-       [SerializeField] int m_DamageAmount;
-       [SerializeField] List<DamageModifier> m_DamageModifiers;
-
-
-    public void Start()
-    {
-        bool isUsingCorrectAbilityConfig = AbilitySOConfigCheck<DirectDamageAbilityConfigSO>();       
-    }
+      protected override bool ValidateConfig()
+      {
+        bool isUsingCorrectAbilityConfig = AbilitySOConfigCheck<DirectDamageAbilityConfigSO>();
+        return isUsingCorrectAbilityConfig;
+      }
 
       public override List<IModifier> Use(GameObject from, List<GameObject> targets)
       {
+
+        // Get configuration data from the game designer
+        var abilityConfiguration = m_AbilityConfigSO as DirectDamageAbilityConfigSO;
+
+        // Create the direct damage modifier for history and reporting.
+        DamageModifier directDamageModifier = new DamageModifier(0);
+
         if (targets != null)
         {
-
           // Apply ability tracking through IModifiable
           foreach (GameObject target in targets)
           {
@@ -32,19 +35,10 @@ namespace FightSongGameLogicSystem
                 targetIsAUnit.m_Modifiers = new LinkedList<IModifier>();
               }
 
-              if (m_DamageModifiers != null)
-              {
-                foreach (DamageModifier damageModifier in m_DamageModifiers)
-                {
-                  damageModifier.SetFrom(from);
-                  damageModifier.SetTargets(targets);
-                  targetIsAUnit.m_Modifiers.AddLast(damageModifier);
-                }
-              }
-
-              targetIsAUnit.TakeDamage(m_DamageAmount, this.gameObject);
-
-
+                  directDamageModifier.SetFrom(from);
+                  directDamageModifier.SetTargets(targets);
+                  targetIsAUnit.m_Modifiers.AddLast(new DamageModifier(directDamageModifier));
+                  targetIsAUnit.TakeDamage(abilityConfiguration.GetDirectDamageAmount(), this.gameObject);
             }
           }
 

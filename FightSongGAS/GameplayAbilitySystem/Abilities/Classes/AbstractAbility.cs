@@ -18,6 +18,13 @@ namespace FightSongGameLogicSystem
       [SerializeField] protected Effect OnCastEffect;
 
         
+        protected abstract bool ValidateConfig();
+
+        protected virtual void Awake()
+        {
+           ValidateConfig();
+        }
+
 
         public virtual List<IModifier> Use(GameObject from, List<GameObject> targets)
         {
