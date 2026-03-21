@@ -10,12 +10,23 @@ namespace FightSongGameLogicSystem
   {
     protected float m_TotalDuration;
     public UnityEvent<List<GameObject>> OnModifierExpiredEvent;
-    private float m_CurrDuration;
+    protected float m_CurrDuration;
     private bool m_IsModifierActive;
 
 
-    public virtual void Initialize()
+    public virtual void Initialize(GameObject from, List<GameObject> targets, float duration)
     {
+
+      // Set the timed modifier's duration
+      m_TotalDuration = duration;
+      m_CurrDuration = m_TotalDuration;
+
+      // Set from
+      SetFrom(from);
+
+      // Set targets for the modifier
+      SetTargets(targets);      
+
       Debug.Log(this.name + this.GetInstanceID().ToString() + " from: " + m_From + "has " + GetCurrentDurationRemaining() + "time remaining.");
       m_CurrDuration = m_TotalDuration;
       m_IsModifierActive = true;
@@ -60,7 +71,7 @@ namespace FightSongGameLogicSystem
               var timedModifiers = unit.m_Modifiers.OfType<TimedModifier>();
               if(timedModifiers != null)
               {
-                Debug.Log("The unit: " + unit.gameObject.name + "has this many timed modifiers on it: " + timedModifiers.Count().ToString());
+                Debug.Log("The unit: " + unit.gameObject.name + " has this many timed modifiers on it: " + timedModifiers.Count().ToString());
               }
             }
           }

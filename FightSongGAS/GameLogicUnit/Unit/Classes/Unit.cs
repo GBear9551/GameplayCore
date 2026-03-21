@@ -43,7 +43,7 @@ namespace FightSongGameLogicSystem
         totalSpeed = 0f;
       }
 
-      Debug.Log("Total Speed: " + totalSpeed + "name: " + gameObject.name);
+      //Debug.Log("Total Speed: " + totalSpeed + "name: " + gameObject.name);
       return totalSpeed;
       
     }

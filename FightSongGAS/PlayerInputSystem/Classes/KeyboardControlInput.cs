@@ -20,9 +20,9 @@ namespace FightSongGameLogicSystem
            
         }
 
-        public void Init(KeyboardMovement movement, Unit unit, InputAction moveVert, InputAction moveHorizontal)
+        public void Init(Unit unit, InputAction moveVert, InputAction moveHorizontal)
         {
-          m_Movement = movement;
+          m_Movement = this.gameObject.AddComponent<KeyboardMovement>();
           m_Unit = unit;
           MoveHorizontally = moveHorizontal;
           MoveVertically = moveVert;

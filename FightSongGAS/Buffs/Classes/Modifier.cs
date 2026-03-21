@@ -16,8 +16,11 @@ namespace FightSongGameLogicSystem
 
 
     public GameObject GetFrom() 
-    { 
-      return m_From; 
+    {
+      if (m_From != null)
+        return m_From;
+
+      return null;
     }
 
     public virtual bool SetFrom(GameObject from)

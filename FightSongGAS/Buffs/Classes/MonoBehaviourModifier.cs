@@ -5,13 +5,17 @@ using UnityEngine;
 
 public class MonoBehaviourModifier : MonoBehaviour, IModifier
 {
-  protected GameObject m_From;
-  protected List<GameObject> m_Targets;
+  [SerializeField] protected GameObject m_From;
+  [SerializeField] protected List<GameObject> m_Targets;
 
   // async remove modifier from targets after delay
   public GameObject GetFrom()
   {
-    return m_From;
+    
+    if(m_From != null)
+      return m_From;
+    
+    return null;
   }
 
   public virtual bool SetFrom(GameObject from)

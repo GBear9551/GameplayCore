@@ -37,7 +37,7 @@ namespace FightSongGameLogicSystem
            m_abilityRunner.UseAbility(m_targets);
            m_targets.Clear();
          }
-         //Destroy(this.gameObject);
+         Destroy(this.gameObject);
       }
 
   }

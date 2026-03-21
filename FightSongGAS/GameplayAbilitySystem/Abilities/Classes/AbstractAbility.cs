@@ -6,8 +6,7 @@ namespace FightSongGameLogicSystem
 
     /*
      
-      Bundles modifiers and sends them out based on the [SerializeField] (Game Designer values passed in).
-
+      Bundles modifiers and sends them out based on the AbilityConfiguration Scriptable Object. 
     */
 
     public abstract class AbstractAbility : MonoBehaviour, IAbility
