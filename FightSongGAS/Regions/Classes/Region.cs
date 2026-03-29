@@ -35,7 +35,6 @@ public class Region : MonoBehaviour, IRegion
           // Get the first modifier
           LinkedListNode<IModifier> currNode = modifiers.First;
 
-
           // All modifiers pushed by this region, must have this region as the from game object. 
           while( currNode != null ) 
           {
@@ -44,19 +43,18 @@ public class Region : MonoBehaviour, IRegion
 
              if( from == this.gameObject)
              {
-                // remove the modifier from the unit 
-                modifiers.Remove( currNode );
+
+                // TODO: Check if the modifier is timed or not, if its timed, let the timer where off for the removal.
+
+                  // remove the modifier from the unit 
+                  modifiers.Remove( currNode );
                 
              }
 
- 
              // Get next node in the list
              currNode = currNode.Next;
 
           }
-          // Look for the modifier from this region.
-          //modifiers.OfType<T>
-
 
         }
      }

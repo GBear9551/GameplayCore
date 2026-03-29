@@ -14,6 +14,13 @@ namespace FightSongGameLogicSystem
 
     // async remove modifier from targets after delay
 
+    public virtual void Initialize(GameObject from, List<GameObject> targets, float duration)
+    {
+       // Empty 
+       SetFrom(from);
+       SetTargets(targets); 
+       // duration is zero or not used for initalizing a modifier, but is used when we want to initialize a monobehaviour TimedModifier. 
+    }
 
     public GameObject GetFrom() 
     {

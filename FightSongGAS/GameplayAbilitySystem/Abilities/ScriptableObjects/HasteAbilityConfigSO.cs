@@ -8,6 +8,9 @@ namespace FightSongGameLogicSystem
 
     [SerializeField] float m_MovementSpeedModificationAmount;
 
+
+
+
     // Amount to increase per level of the unit.
 
     // Talent/Research/Skill Tree stat adjustments
@@ -16,7 +19,6 @@ namespace FightSongGameLogicSystem
     { 
  
       return m_MovementSpeedModificationAmount; 
-
     }
   }
 }

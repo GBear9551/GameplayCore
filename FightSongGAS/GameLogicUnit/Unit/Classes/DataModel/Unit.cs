@@ -3,6 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
+using FightSongEventProgrammingSystem;
+using System;
+
+
+
+
 
 namespace FightSongGameLogicSystem
 {
@@ -12,15 +18,47 @@ namespace FightSongGameLogicSystem
     public GameObject Target => null;
     public UnitConfig m_UnitConfig;
 
-    private int m_currentHealth;
+    private int m_CurrentHealth;
 
     public UnityEvent<GameObject> OnDeath;
 
-    
+    // Need a place to subscribe to this event, thinking an event channel.
+    //private UnitEventBus 
+    private OnTakeDamageEvent m_UnitOnTakeDamageEvent;
+    private OnUnitSpawnEvent m_UnitOnSpawnedEvent;
+    private OnHealEvent m_UnitOnHealEvent;
+
+
+    public void OnEnable()
+    {
+       Create();
+    }
+
+    public virtual void Create()
+    {
+
+      m_CurrentHealth = m_UnitConfig.GetMaxHealthPointsAmount();
+
+      // Handle On Create modifiers
+
+      m_UnitOnSpawnedEvent = new OnUnitSpawnEvent()
+      {
+        MaxHealth = m_UnitConfig.GetMaxHealthPointsAmount(),
+        CurrentHealth = m_UnitConfig.GetMaxHealthPointsAmount(),
+        m_UnitDataModel = this
+      };
+
+       EventBus<OnUnitSpawnEvent>.Raise(m_UnitOnSpawnedEvent);
+    }
 
     public virtual int GetHealth()
     {
-       return m_currentHealth;  
+       return m_CurrentHealth;  
+    }
+
+    public virtual int GetMaxHealth()
+    {
+      return m_UnitConfig.GetMaxHealthPointsAmount();
     }
 
     public virtual float GetSpeed()
@@ -69,7 +107,7 @@ namespace FightSongGameLogicSystem
       // Declare and initialize variables
       int totalHeal = 0;
       int newHealth = 0;
-      int pastHealth = m_currentHealth;
+      int pastHealth = m_CurrentHealth;
       int amountHealed = 0;
 
       // Look at modifiers, does a heal modifier exist?
@@ -83,25 +121,37 @@ namespace FightSongGameLogicSystem
       // TODO: Manage single use memory Property bag to remove single use modifiers? 
 
       // Constraints
-      newHealth = totalHeal + amountToHealBy + m_currentHealth;
+      newHealth = totalHeal + amountToHealBy + m_CurrentHealth;
 
-      if(m_currentHealth > 0)
+      if(m_CurrentHealth > 0)
       {
 
         if (newHealth > m_UnitConfig.GetMaxHealthPointsAmount())
         {
-          m_currentHealth = m_UnitConfig.GetMaxHealthPointsAmount();
+          m_CurrentHealth = m_UnitConfig.GetMaxHealthPointsAmount();
         }
         else
         {
-          m_currentHealth = newHealth;
+          m_CurrentHealth = newHealth;
         }
       }
 
-      amountHealed = m_currentHealth - pastHealth;  
+      amountHealed = m_CurrentHealth - pastHealth;  
       
       // Report healing done.
       Debug.Log("Target: " +  gameObject.name + " healed by this amount: " +  amountHealed);
+
+
+      // Create heal event
+      m_UnitOnHealEvent = new OnHealEvent()
+      {
+        HealthAfterHeal = m_CurrentHealth,
+        m_UnitDataModel = this
+      };
+
+      EventBus<OnHealEvent>.Raise(m_UnitOnHealEvent);
+
+
 
       // Report Sources of healing
 
@@ -114,13 +164,13 @@ namespace FightSongGameLogicSystem
        // Declare and initialize variables
         int totalDamage = 0;
         int modifiedDamage = 0;
-        int pastHealth = m_currentHealth;
+        int pastHealth = m_CurrentHealth;
         int newHealth = 0;
         int damageDealt = 0;
         
 
       // If current health is zero don't take damage.
-        if (m_currentHealth == 0) return 0;
+        if (m_CurrentHealth == 0) return 0;
 
       // If unit is invulnerable, take no damage, TODO: remove captured data, use calculation to avoid cache-invalidation.
       bool cap = m_Modifiers.OfType<InvulnerabilityModifier>().Any();
@@ -141,7 +191,7 @@ namespace FightSongGameLogicSystem
 
       // Calculate total damage, new health, and damage dealt
         totalDamage = modifiedDamage + baseDamageToApply;
-        newHealth = m_currentHealth - totalDamage;
+        newHealth = m_CurrentHealth - totalDamage;
 
       // Constraints
 
@@ -155,7 +205,7 @@ namespace FightSongGameLogicSystem
           // If no prevent death modifiers
 
           // Set the current health to zero.
-            m_currentHealth = 0;
+            m_CurrentHealth = 0;
 
             // Function: Die() -> Care and think about deallocate or Destroy from here, should be Game Logic Specific.
 
@@ -172,7 +222,7 @@ namespace FightSongGameLogicSystem
       {  
 
         // Take Damage if damage was not zero
-          m_currentHealth = newHealth;
+          m_CurrentHealth = newHealth;
 
         // Blocked Damage Effect
         // Check for block Modifiers in IModifiers
@@ -189,10 +239,16 @@ namespace FightSongGameLogicSystem
 
  
         // Calculate damage dealt
-        damageDealt = pastHealth - m_currentHealth;
+        damageDealt = pastHealth - m_CurrentHealth;
 
+       
 
         // Reporting 
+        m_UnitOnTakeDamageEvent = new OnTakeDamageEvent() {
+                                            HealthAfterDamageTaken = m_CurrentHealth,
+                                            m_UnitDataModel = this };
+                              
+        EventBus<OnTakeDamageEvent>.Raise(m_UnitOnTakeDamageEvent);
 
         Debug.Log("Target: " +  gameObject.name + " damage dealt to this unit was: " +  damageDealt + " from: " + damageSource.name); 
 
@@ -247,7 +303,7 @@ namespace FightSongGameLogicSystem
 
     private void Initialization()
     {
-      m_currentHealth = m_UnitConfig.GetMaxHealthPointsAmount();
+      m_CurrentHealth = m_UnitConfig.GetMaxHealthPointsAmount();
     }
 
     private void Start()

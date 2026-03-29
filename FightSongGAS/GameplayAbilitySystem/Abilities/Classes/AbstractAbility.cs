@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace FightSongGameLogicSystem
@@ -18,6 +19,26 @@ namespace FightSongGameLogicSystem
 
         
         protected abstract bool ValidateConfig();
+
+
+        protected static T AddTimedModifierComponent<T>(GameObject target) where T : TimedModifier
+        {
+
+           // Declare and initialize variables.
+
+           // Get the timed modifier from the target game object.
+           var compFromTarget  = target.GetComponent<T>();
+
+           // Check to see if the component is on the target, if not, then add the timed modifier component of type T.
+           if(compFromTarget == null )
+           {
+              compFromTarget = target.AddComponent<T>();
+              return compFromTarget;
+           }
+
+           // Else the timed modifier component was not added, and was already present on the game object.
+           return compFromTarget;
+        }
 
         protected virtual void Awake()
         {

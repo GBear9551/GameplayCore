@@ -15,4 +15,6 @@ MonoBehaviour:
   m_AbilityType: 5
   m_CastTime: 0
   m_CurrentAbilityLevel: 1
+  m_TimedBuff: 0
+  m_BuffDuration: 1
   m_MovementSpeedModificationAmount: 50

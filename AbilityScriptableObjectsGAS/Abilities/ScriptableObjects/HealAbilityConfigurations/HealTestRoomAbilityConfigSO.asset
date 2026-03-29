@@ -12,7 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92354e33a22d5744cb7be1e4c05041f7, type: 3}
   m_Name: HealTestRoomAbilityConfigSO
   m_EditorClassIdentifier: Assembly-CSharp::FightSongGameLogicSystem.HealAbilityConfigSO
-  m_AbilityType: 0
+  m_AbilityType: 19
   m_CastTime: 0
   m_CurrentAbilityLevel: 1
-  m_HealAmount: 1
+  m_TimedBuff: 1
+  m_BuffDuration: 1
+  m_HealAmount: 5

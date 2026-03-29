@@ -90,5 +90,13 @@ public class MonoBehaviourModifier : MonoBehaviour, IModifier
     Debug.Log("Derived class did not implement base class Modifier function Refresh() from " + m_From.name);
     return false;
   }
+
+  public virtual void Initialize(GameObject from, List<GameObject> targets, float duration)
+  {
+
+    Debug.LogError("MonoBehaviourModifier (base class) function: Initialize(...) is being called, please override Intialize(from,targets,duration)");
+
+  }
+
 }
 
