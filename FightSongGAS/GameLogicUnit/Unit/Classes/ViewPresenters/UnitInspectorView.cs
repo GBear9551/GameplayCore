@@ -21,19 +21,22 @@ namespace FightSongGameLogicSystem
 
       public void OnEnable()
       {
-         EventBus<OnTakeDamageEvent>.OnEvent += OnTakeDamage;
-         EventBus<OnHealEvent>.OnEvent += OnHeal;
-         EventBus<OnUnitSpawnEvent>.OnEvent += OnUnitCreatedEvent;
+        // Subscribe to unit on take damage event and on created
+        m_Unit.OnTakeDamage += OnTakeDamage;
+        m_Unit.OnHeal += OnHeal;
+        m_Unit.OnUnitSpawn += OnUnitCreatedEvent;
       }
 
       // Remember to unsubscribe i.e. pointer must be set to null at the end of object life time. 
       // Event Bus could handle this gracefully if programmed correctly, potentially
       public void OnDisable()
       {
-        EventBus<OnTakeDamageEvent>.OnEvent -= OnTakeDamage;
-        EventBus<OnHealEvent>.OnEvent -= OnHeal;
-        EventBus<OnUnitSpawnEvent>.OnEvent -= OnUnitCreatedEvent;
+        // Subscribe to unit on take damage event and on created
+        m_Unit.OnTakeDamage -= OnTakeDamage;
+        m_Unit.OnHeal -= OnHeal;
+        m_Unit.OnUnitSpawn -= OnUnitCreatedEvent;
       }
+
       public void OnHeal(OnHealEvent eventMessage)
       {
         if (m_Unit == eventMessage.m_UnitDataModel)

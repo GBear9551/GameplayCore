@@ -4,7 +4,10 @@ namespace FightSongEventProgrammingSystem
 {
     public class OnTakeDamageEvent : AbstractUnitEvent 
     {
-      public int HealthAfterDamageTaken;   
+
+      public int HealthAfterDamageTaken; 
+
+      
 
     }
 }

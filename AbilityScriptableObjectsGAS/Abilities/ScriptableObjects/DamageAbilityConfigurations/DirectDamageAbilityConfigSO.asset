@@ -12,7 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09276ffe585b30148b42c2069ab7010e, type: 3}
   m_Name: DirectDamageAbilityConfigSO
   m_EditorClassIdentifier: Assembly-CSharp::FightSongGameLogicSystem.DirectDamageAbilityConfig
-  m_AbilityType: 0
+  m_AbilityType: 23
   m_CastTime: 0
   m_CurrentAbilityLevel: 1
+  m_TimedBuff: 1
+  m_BuffDuration: 1
   m_DirectDamageAmount: 1

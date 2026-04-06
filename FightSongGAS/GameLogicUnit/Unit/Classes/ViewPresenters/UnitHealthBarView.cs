@@ -36,10 +36,11 @@ namespace FightSongGameLogicSystem
 
       public void OnTakeDamage(OnTakeDamageEvent eventMessage)
       {
-         if(m_Unit == eventMessage.m_UnitDataModel)
-         {
+         //if(m_Unit == eventMessage.m_UnitDataModel)
+         //{
             UpdateHealthBar( m_Unit.GetHealth(), m_Unit.GetMaxHealth());
-         }
+            Debug.Log("Event called from " + this.gameObject.name);
+        // }
       }
 
       public void OnHeal(OnHealEvent eventMessage)
@@ -74,10 +75,9 @@ namespace FightSongGameLogicSystem
       {
 
         // Subscribe to unit on take damage event and on created
-        EventBus<OnTakeDamageEvent>.OnEvent += OnTakeDamage;
-        EventBus<OnHealEvent>.OnEvent += OnHeal;
-        EventBus<OnUnitSpawnEvent>.OnEvent += OnUnitCreated;
-
+        m_Unit.OnTakeDamage += OnTakeDamage;
+        m_Unit.OnHeal += OnHeal;
+        m_Unit.OnUnitSpawn += OnUnitCreated;
 
       }
 
@@ -85,11 +85,9 @@ namespace FightSongGameLogicSystem
     // On Disable No longer subscribe to those events
       public void OnDisable()
       {
-
-        EventBus<OnTakeDamageEvent>.OnEvent -= OnTakeDamage;
-        EventBus<OnHealEvent>.OnEvent-= OnHeal;
-        EventBus<OnUnitSpawnEvent>.OnEvent -= OnUnitCreated;
-
+          m_Unit.OnTakeDamage -= OnTakeDamage;
+          m_Unit.OnHeal -= OnHeal;
+          m_Unit.OnUnitSpawn -= OnUnitCreated;
       }
 
     void LateUpdate()

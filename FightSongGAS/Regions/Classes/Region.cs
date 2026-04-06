@@ -24,7 +24,7 @@ public class Region : MonoBehaviour, IRegion
      {
 
         // Get the modifiers stored on the unit
-        var modifiers = unit.m_Modifiers;
+        var modifiers = unit.m_Modifiers; 
 
         // Check to see if the modifiers are allocated.
         if(modifiers != null )

@@ -7,10 +7,15 @@ namespace FightSongGameLogicSystem
     {
 
       [SerializeField] private float m_BaseGroundSpeed;
+      [SerializeField] private int m_BaseDamage;
       [SerializeField] private int m_MaxHealthPoints;
       [SerializeField] private Vector3 m_MaxAllowedSize;
       [SerializeField] private Vector3 m_MinAllowedSize;
 
+      public int GetBaseDamage()
+      {
+        return m_BaseDamage;
+      }
 
       public Vector3 GetMaxSizeAllow()
       {

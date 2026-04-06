@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 using FightSongEventProgrammingSystem;
+using FightSongLoggingSystem;
 using System;
 
 
@@ -14,16 +15,32 @@ namespace FightSongGameLogicSystem
 {
   public abstract class Unit : MonoBehaviour, IUnit
   {
+
+
     public LinkedList<IModifier> m_Modifiers = new LinkedList<IModifier>();
     public GameObject Target => null;
     public UnitConfig m_UnitConfig;
 
     private int m_CurrentHealth;
 
+    // Game Designer Pluggable Events
     public UnityEvent<GameObject> OnDeath;
 
     // Need a place to subscribe to this event, thinking an event channel.
     //private UnitEventBus 
+
+
+    // Locomotion State
+
+  
+
+
+    // Publishable events, programmer reporting 
+    public event Action<OnTakeDamageEvent> OnTakeDamage;
+    public event Action<OnHealEvent> OnHeal;
+    public event Action<OnUnitSpawnEvent> OnUnitSpawn;
+    
+    // Event Objects, data containers, used to push to combat logs and achievement system. 
     private OnTakeDamageEvent m_UnitOnTakeDamageEvent;
     private OnUnitSpawnEvent m_UnitOnSpawnedEvent;
     private OnHealEvent m_UnitOnHealEvent;
@@ -48,7 +65,20 @@ namespace FightSongGameLogicSystem
         m_UnitDataModel = this
       };
 
+      // Invoke the specific unit channel event, for unit specific extensions.
+      OnUnitSpawn?.Invoke(m_UnitOnSpawnedEvent);
+
+      // Report to combat logs, achievement system, and etc
        EventBus<OnUnitSpawnEvent>.Raise(m_UnitOnSpawnedEvent);
+
+      // Compile logging when needed
+      #if FIGHTSONG_LOGGING
+
+        LoggingSystem.LogString($"[Combat] Unit Created: {this.gameObject.name}", Unity.VisualScripting.WarningLevel.Info);
+
+      #endif 
+       
+
     }
 
     public virtual int GetHealth()
@@ -86,6 +116,8 @@ namespace FightSongGameLogicSystem
       
     }
 
+    public virtual int GetDamage() { return m_UnitConfig.GetBaseDamage(); }
+
     public virtual bool Die()
     {
       // Declare and initialize variables
@@ -110,9 +142,12 @@ namespace FightSongGameLogicSystem
       int pastHealth = m_CurrentHealth;
       int amountHealed = 0;
 
+
       // Look at modifiers, does a heal modifier exist?
       if (m_Modifiers != null)
       {
+        // Could be: var modifiers = m_Modifiers.OfType<HealModifier>();
+        // and be a while loop for linked list traversal, but when the unit is healed on a time slice, all timed modifiers should be off or luckily be on here.
         foreach (HealModifier healModifier in m_Modifiers.OfType<HealModifier>())
         {
           totalHeal += healModifier.GetHealModifier();
@@ -149,7 +184,17 @@ namespace FightSongGameLogicSystem
         m_UnitDataModel = this
       };
 
+      // Invoke the specific unit channel event, for unit specific extensions.
+      OnHeal?.Invoke(m_UnitOnHealEvent);
+
+      // Report to combat logs, achievement system, and etc
       EventBus<OnHealEvent>.Raise(m_UnitOnHealEvent);
+
+
+      #if FightSongLogging
+
+
+      #endif
 
 
 
@@ -247,11 +292,17 @@ namespace FightSongGameLogicSystem
         m_UnitOnTakeDamageEvent = new OnTakeDamageEvent() {
                                             HealthAfterDamageTaken = m_CurrentHealth,
                                             m_UnitDataModel = this };
-                              
+
+
+        // Invoke the specific unit channel event, for unit specific extensions.
+        OnTakeDamage?.Invoke(m_UnitOnTakeDamageEvent);
+
+        // Report to combat logs, achievement system, and etc                              
         EventBus<OnTakeDamageEvent>.Raise(m_UnitOnTakeDamageEvent);
 
-        Debug.Log("Target: " +  gameObject.name + " damage dealt to this unit was: " +  damageDealt + " from: " + damageSource.name); 
-
+        #if FIGHTSONG_COMBAT_LOG
+          Debug.Log("Target: " +  gameObject.name + " damage dealt to this unit was: " +  damageDealt + " from: " + damageSource.name); 
+        #endif
 
         return damageDealt;
     }
