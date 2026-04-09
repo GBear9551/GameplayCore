@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
+//using UnityEngine.InputSystem;
 
 namespace FightSongGameLogicSystem
 {
@@ -8,7 +8,7 @@ namespace FightSongGameLogicSystem
 
         [SerializeField] private KeyboardMovement m_Movement;
         private Unit m_Unit;
-        public InputAction MoveVertically;
+        /*public InputAction MoveVertically;
         public InputAction MoveHorizontally;
 
 
@@ -66,6 +66,6 @@ namespace FightSongGameLogicSystem
              }
             }
         
-        }
+        }*/
     }
 }

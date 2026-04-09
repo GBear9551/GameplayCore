@@ -32,11 +32,12 @@ namespace FightSongGameLogicSystem
           // Get the force direction from the game object using this ability.
           // This needs to be stored in the unit, and the unit should have a force direction intention stored in it. 
           // Could come from a projectile if a projectile is running the ability as well. 
-          var player = from.GetComponent<GameDevTV.FPS.Player>();
+          var player = from.GetComponent<Unit>();
 
           if (player != null)
           {
-            var forceDirection = player.GetForceDirectionFromShot();
+
+            var forceDirection = player.GetKnockBackDirection();
 
             rb.AddForce(forceDirection * knockBackConfigSO.GetKnockBackForce());
           }

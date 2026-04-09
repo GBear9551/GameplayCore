@@ -19,9 +19,13 @@ namespace FightSongGameLogicSystem
 
     public LinkedList<IModifier> m_Modifiers = new LinkedList<IModifier>();
     public GameObject Target => null;
-    public UnitConfig m_UnitConfig;
+    [SerializeField] protected UnitConfig m_UnitConfig;
 
+    // Programmer Data
+    private GlobalBaseUnitStatSystem m_BaseUnitStatSystem;
     private int m_CurrentHealth;
+    private Vector3 m_OriginialSize;
+
 
     // Game Designer Pluggable Events
     public UnityEvent<GameObject> OnDeath;
@@ -46,7 +50,7 @@ namespace FightSongGameLogicSystem
     private OnHealEvent m_UnitOnHealEvent;
 
 
-    public void OnEnable()
+    protected virtual void OnEnable()
     {
        Create();
     }
@@ -54,14 +58,20 @@ namespace FightSongGameLogicSystem
     public virtual void Create()
     {
 
+      // Get the base game specific stat system. Used to make adjustments to every unit.
+      m_BaseUnitStatSystem = m_UnitConfig.GetBaseStatSystem();
+    
+
+      // Set specific variables that are bound to the create event. Possibly pull data from other OnCreateResearch or Talents.
       m_CurrentHealth = m_UnitConfig.GetMaxHealthPointsAmount();
+      m_OriginialSize = transform.localScale;
 
       // Handle On Create modifiers
 
       m_UnitOnSpawnedEvent = new OnUnitSpawnEvent()
       {
-        MaxHealth = m_UnitConfig.GetMaxHealthPointsAmount(),
-        CurrentHealth = m_UnitConfig.GetMaxHealthPointsAmount(),
+        MaxHealth = GetMaxHealth(),
+        CurrentHealth = GetMaxHealth(),
         m_UnitDataModel = this
       };
 
@@ -88,7 +98,8 @@ namespace FightSongGameLogicSystem
 
     public virtual int GetMaxHealth()
     {
-      return m_UnitConfig.GetMaxHealthPointsAmount();
+      int baseGameUnitMaxHealthModifier = m_BaseUnitStatSystem.GetBaseGameUnitMaxHealthAmount();
+      return m_UnitConfig.GetMaxHealthPointsAmount() + baseGameUnitMaxHealthModifier;
     }
 
     public virtual float GetSpeed()
@@ -116,6 +127,21 @@ namespace FightSongGameLogicSystem
       
     }
 
+    public virtual float GetJumpForce() 
+    { 
+
+       // Apply jump force modifiers.
+
+       return m_UnitConfig.GetJumpForce();
+    }
+
+    public virtual float GetDoubleJumpForce()
+    {
+        // Apply double jump force modifiers.
+
+        return m_UnitConfig.GetDoubleJumpForce();
+    }
+
     public virtual int GetDamage() { return m_UnitConfig.GetBaseDamage(); }
 
     public virtual bool Die()
@@ -131,6 +157,17 @@ namespace FightSongGameLogicSystem
       // function stubb
       return true;
     }
+
+
+    // Jump cooldown
+    public virtual float GetJumpCooldown()
+    {
+        // Apply data modifiers to base jump cooldown data.
+
+        // function stubb
+        return m_UnitConfig.GetJumpInterval();
+    }
+
 
     // Base functionality for a unit receiving a heal.
     public int Heal(int amountToHealBy, GameObject healingSource)
@@ -312,7 +349,7 @@ namespace FightSongGameLogicSystem
     {
 
        // Declare and initialize variables
-       Vector3 currentScale = gameObject.transform.localScale;
+       Vector3 originalScale = m_OriginialSize;
        Vector3 newScale = Vector3.zero;
        Vector3 maxSizeAllowed = m_UnitConfig.GetMaxSizeAllow();
        Vector3 minimumSizeAllowed = m_UnitConfig.GetMinimumSizeAllowed();
@@ -328,17 +365,19 @@ namespace FightSongGameLogicSystem
         }
 
       // Apply computated scaling modifiers to newScale
-        newScale = currentScale + scalingAmount;
+        newScale = originalScale + scalingAmount;
 
       // Constraints, check max and min allowable size for the unit.  
 
       // Check for max size, probably should be component scale checking, magnitude might ease that for now.
-      if (newScale.magnitude > maxSizeAllowed.magnitude )
+      if ( (newScale.x > maxSizeAllowed.x)  &&
+               (newScale.y > maxSizeAllowed.y) && 
+                            (newScale.z > maxSizeAllowed.z) )
        {
           newScale = maxSizeAllowed;
-          
        }
-       else if(newScale.magnitude < minimumSizeAllowed.magnitude ) 
+
+       else if(newScale.x < minimumSizeAllowed.x  && newScale.y < minimumSizeAllowed.y && newScale.z < minimumSizeAllowed.z) 
        {
           newScale = minimumSizeAllowed;
        }
@@ -361,5 +400,21 @@ namespace FightSongGameLogicSystem
     {
       Initialization();
     }
+
+    public virtual bool SetKnockBackDirection()
+    {
+
+      #if FIGHTSONG_LOGGING
+        LoggingSystem.LogString($"[Combat - Ability - KnockBack] GameObject: {this.gameObject.name} KnockBackforce vector: <{GetKnockBackDirection()}> using default base class, please consider overriding in derived class.", Unity.VisualScripting.WarningLevel.Caution); 
+      #endif
+
+      return true;
+    }
+
+    public virtual Vector3 GetKnockBackDirection()
+    {
+      return transform.forward;
+    }
+
   }
 }

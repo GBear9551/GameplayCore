@@ -14,7 +14,7 @@ namespace FightSongGameLogicSystem
     private bool m_IsModifierActive;
 
 
-    public virtual void Initialize(GameObject from, List<GameObject> targets, float duration)
+    public override void Initialize(GameObject from, List<GameObject> targets, float duration)
     {
 
       // Set the timed modifier's duration
