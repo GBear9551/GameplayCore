@@ -16,6 +16,7 @@ namespace FightSongGameLogicSystem
       // Game Designer ( data )
       [SerializeField] protected AbstractAbilityConfigSO m_AbilityConfigSO;
       [SerializeField] protected Effect OnCastEffect;
+      [SerializeField] protected Effect OnHitEffect;
 
         
         protected abstract bool ValidateConfig();

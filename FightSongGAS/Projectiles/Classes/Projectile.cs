@@ -13,6 +13,7 @@ namespace FightSongGameLogicSystem
     // Game Designer Data
     [Header("Creating an ability runner can be fun! Attach it to the projectile config SO")]
     [SerializeField] ProjectileSO m_ProjectileConfigSO;
+    [SerializeField] Effect m_OnHitEffect;
 
 
     // Projectile Modifiers
@@ -42,6 +43,10 @@ namespace FightSongGameLogicSystem
        m_directionToTravel = directionToTravel;
     }
 
+    public Vector3 GetKnockBackDirection()
+    {
+      return m_directionToTravel;
+    }
 
     void Start()
     {
@@ -88,9 +93,14 @@ namespace FightSongGameLogicSystem
     // Game Logic
     protected virtual void HandleTrigger(GameObject otherObject)
     {
+
+      PlayOnHitEffect();
+
       Unit unit = otherObject.GetComponent<Unit>();
 
-      if (unit != null )
+      // Consider friendly fire
+
+      if (unit != null && otherObject.layer != LayerMask.NameToLayer("Friendly")) 
       {
 
         Debug.Log("Trigger entered by: " + otherObject.name);
@@ -100,6 +110,7 @@ namespace FightSongGameLogicSystem
 
         if (abilityRunner != null)
         {
+          abilityRunner.SetFrom(this.gameObject);
           abilityRunner.UseAbility(m_targets);
         }
         m_targets.Clear();
@@ -115,7 +126,13 @@ namespace FightSongGameLogicSystem
       }
        
     }
-
+    protected virtual void PlayOnHitEffect()
+    {
+      if (m_OnHitEffect != null)
+      {
+        m_OnHitEffect.PlayVFX();
+      }
+    }
     private void OnTriggerEnter(Collider other)
     {
       HandleTrigger(other.gameObject);

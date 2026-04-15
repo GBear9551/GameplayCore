@@ -12,5 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab3b0395792bf8841b5a34a387ee6336, type: 3}
   m_Name: PlayerPlatformMovementConfigSO
   m_EditorClassIdentifier: 
-  m_ExtraGravity: 20
-  m_ExtraGravityDelay: 0.5
+  m_ExtraGravity: 16.5
+  m_ExtraGravityDelay: 0.75
+  m_CoyoteTime: 0.5

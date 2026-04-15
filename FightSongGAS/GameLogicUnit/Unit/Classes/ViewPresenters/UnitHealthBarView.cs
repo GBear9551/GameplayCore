@@ -85,10 +85,17 @@ namespace FightSongGameLogicSystem
     // On Disable No longer subscribe to those events
       public void OnDisable()
       {
-          m_Unit.OnTakeDamage -= OnTakeDamage;
+          /*m_Unit.OnTakeDamage -= OnTakeDamage;
           m_Unit.OnHeal -= OnHeal;
-          m_Unit.OnUnitSpawn -= OnUnitCreated;
+          m_Unit.OnUnitSpawn -= OnUnitCreated;*/
       }
+
+    public void OnDestroy()
+    {
+      m_Unit.OnTakeDamage -= OnTakeDamage;
+      m_Unit.OnHeal -= OnHeal;
+      m_Unit.OnUnitSpawn -= OnUnitCreated;
+    }
 
     void LateUpdate()
     {

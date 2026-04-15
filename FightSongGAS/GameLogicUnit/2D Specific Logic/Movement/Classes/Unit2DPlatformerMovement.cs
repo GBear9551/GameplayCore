@@ -1,11 +1,13 @@
 using FightSongLoggingSystem;
+using FightSongStateMachine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace FightSongGameLogicSystem
 {
-  [RequireComponent(typeof(Rigidbody2D),typeof(Unit))]
+  [RequireComponent(typeof(Rigidbody2D),typeof(Unit),typeof(LocomotionStateMachine))]
   public class Unit2DPlatformerMovement : MonoBehaviour, I2DUnitPlatformerMovement
   {
 
@@ -20,6 +22,7 @@ namespace FightSongGameLogicSystem
     protected Rigidbody2D m_RigidBody2D;
     protected bool m_DoubleJumpAvailable = true;
     protected float m_CoyoteTimer;
+    protected LocomotionStateMachine m_LocomotionStateMachine;
     private Vector2 m_MovementVector;
     private float m_TimeSpentInAir;
     private float m_OriginalGravityScale;
@@ -36,7 +39,6 @@ namespace FightSongGameLogicSystem
       Gizmos.DrawWireCube(m_FeetTransform.position, m_FootSize);
     }
 
-
     public bool SetMovementVector(Vector2 movementVector)
     {
 
@@ -47,6 +49,7 @@ namespace FightSongGameLogicSystem
     protected virtual void Awake()
     {
 
+      m_LocomotionStateMachine = GetComponent<LocomotionStateMachine>();  
       m_RigidBody2D = GetComponent<Rigidbody2D>();
       m_OriginalGravityScale = m_RigidBody2D.gravityScale;
       m_CoyoteTimer = m_PlatformerMovement2DConfigSO.GetCoyoteTime();
@@ -71,6 +74,7 @@ namespace FightSongGameLogicSystem
       if(!m_IsGrounded)
       {
         m_TimeSpentInAir += Time.deltaTime;
+        m_LocomotionStateMachine.Fall();
       }
       else
       {
@@ -101,7 +105,6 @@ namespace FightSongGameLogicSystem
       }
     }
 
-
     public void ExtraGravityLogic()
     {
 
@@ -122,12 +125,38 @@ namespace FightSongGameLogicSystem
 
     public void Move(Vector2 movementVelocity) 
     {
+       var unit = GetComponent<Unit>();
+       if(unit != null)
+       {
+          var stunModifiers = unit.m_Modifiers.OfType<IStunMovementModifier>();
+          if( stunModifiers != null)
+          {
+            if (stunModifiers.Count() > 0)
+            {
+              return;
+            }
+          }
+       }
        m_RigidBody2D.velocity = new Vector2(movementVelocity.x, m_RigidBody2D.velocity.y);
     }
 
     public void Jump(Vector2 JumpForce) 
     {
-       m_RigidBody2D.AddForce(JumpForce, ForceMode2D.Impulse);
+
+      var unit = GetComponent<Unit>();
+      if (unit != null)
+      {
+        var stunModifiers = unit.m_Modifiers.OfType<IStunMovementModifier>();
+        if (stunModifiers != null)
+        {
+          if (stunModifiers.Count() > 0)
+          {
+            return;
+          }
+        }
+      }
+      m_LocomotionStateMachine.Jump();
+      m_RigidBody2D.AddForce(JumpForce, ForceMode2D.Impulse);
       
     }
 
@@ -136,10 +165,14 @@ namespace FightSongGameLogicSystem
 
       Collider2D isGrounded = Physics2D.OverlapBox(m_FeetTransform.position, m_FootSize, 0f, m_GroundLayer );
 
-      return isGrounded;
+      if( isGrounded )
+      {
+        m_LocomotionStateMachine.Land();
+      }
+
+        return isGrounded;
 
     }
-
 
     public Vector2 GetFacing()
     {

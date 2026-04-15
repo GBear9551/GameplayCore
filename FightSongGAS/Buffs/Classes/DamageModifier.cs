@@ -7,6 +7,7 @@ namespace FightSongGameLogicSystem
 
        [SerializeField] int m_DamageAmount;
 
+       // Scriptable Object AbilityTypes[]
 
        
        public DamageModifier(int damageAmount)

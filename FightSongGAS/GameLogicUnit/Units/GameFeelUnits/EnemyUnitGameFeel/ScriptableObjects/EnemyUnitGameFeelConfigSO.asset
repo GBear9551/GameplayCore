@@ -19,7 +19,7 @@ MonoBehaviour:
   m_DoubleJumpBaseForce: 5
   m_BaseDamage: 1
   m_KnockBackForce: 0
-  m_MaxHealthPoints: 3
+  m_MaxHealthPoints: 5
   m_MaxAllowedSize: {x: 5, y: 5, z: 5}
   m_MinAllowedSize: {x: 0.1, y: 0.1, z: 0.1}
   m_ChangeDirectionInterval: 3

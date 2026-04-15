@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using FightSongEventProgrammingSystem;
 using FightSongLoggingSystem;
+using FightSongStateMachine;
 using System;
 
 
@@ -17,9 +18,14 @@ namespace FightSongGameLogicSystem
   {
 
 
+    [SerializeField] protected UnitConfig m_UnitConfig;
+
+    [SerializeField] protected Effect m_OnTakeDamageEffect;
+    [SerializeField] protected Effect m_OnDeathEffect;
+
     public LinkedList<IModifier> m_Modifiers = new LinkedList<IModifier>();
     public GameObject Target => null;
-    [SerializeField] protected UnitConfig m_UnitConfig;
+
 
     // Programmer Data
     private GlobalBaseUnitStatSystem m_BaseUnitStatSystem;
@@ -50,6 +56,12 @@ namespace FightSongGameLogicSystem
     private OnHealEvent m_UnitOnHealEvent;
 
 
+    protected virtual void Awake()
+    {
+      // Get the base game specific stat system. Used to make adjustments to every unit.
+      m_BaseUnitStatSystem = m_UnitConfig.GetBaseStatSystem();
+    }
+
     protected virtual void OnEnable()
     {
        Create();
@@ -63,7 +75,7 @@ namespace FightSongGameLogicSystem
     
 
       // Set specific variables that are bound to the create event. Possibly pull data from other OnCreateResearch or Talents.
-      m_CurrentHealth = m_UnitConfig.GetMaxHealthPointsAmount();
+      m_CurrentHealth = GetMaxHealth();
       m_OriginialSize = transform.localScale;
 
       // Handle On Create modifiers
@@ -76,7 +88,7 @@ namespace FightSongGameLogicSystem
       };
 
       // Invoke the specific unit channel event, for unit specific extensions.
-      OnUnitSpawn?.Invoke(m_UnitOnSpawnedEvent);
+        OnUnitSpawn?.Invoke(m_UnitOnSpawnedEvent);
 
       // Report to combat logs, achievement system, and etc
        EventBus<OnUnitSpawnEvent>.Raise(m_UnitOnSpawnedEvent);
@@ -89,6 +101,9 @@ namespace FightSongGameLogicSystem
       #endif 
        
 
+
+
+
     }
 
     public virtual int GetHealth()
@@ -98,6 +113,7 @@ namespace FightSongGameLogicSystem
 
     public virtual int GetMaxHealth()
     {
+      //GlobalBaseUnitStatSystem globalBaseUnitStatSystemRef = m_UnitConfig.GetBaseStatSystem();
       int baseGameUnitMaxHealthModifier = m_BaseUnitStatSystem.GetBaseGameUnitMaxHealthAmount();
       return m_UnitConfig.GetMaxHealthPointsAmount() + baseGameUnitMaxHealthModifier;
     }
@@ -106,6 +122,15 @@ namespace FightSongGameLogicSystem
     {
       float speedModifier = 0f;
       float totalSpeed = 0f;
+      var stunModifiers = m_Modifiers.OfType<IStunMovementModifier>();
+
+      if (stunModifiers != null)
+      {
+        if (stunModifiers.Count() > 0)
+        {
+          return 0f;
+        }
+      }
 
       foreach(MovementModifier movement in m_Modifiers.OfType<MovementModifier>())
       {
@@ -153,11 +178,40 @@ namespace FightSongGameLogicSystem
       // Clearing all modifiers for current implementation
       m_Modifiers.Clear();
 
+      // Death Effect
+      PlayOnDeathEffect();
+
+      // Call Death Anim
+
+      // Call OnDeath event 
+
+      // Release this unit back to the pool, unless revivable, check for cheat death modifiers/game logic.
 
       // function stubb
       return true;
     }
 
+    protected virtual void ReturnUnitToObjectPool()
+    {
+      var pooledObj = GetComponent<PooledGameObject>();
+      if (pooledObj != null)
+      {
+        pooledObj.ReturnToPool();
+      }
+
+    }
+
+    protected virtual void PlayOnDeathEffect()
+    {
+      // Declare and initialize variables
+
+      // If the on death effect is not null, then play the on death effect.
+      if(m_OnDeathEffect != null)
+      {
+        m_OnDeathEffect.PlayVFX();
+      }
+
+    }
 
     // Jump cooldown
     public virtual float GetJumpCooldown()
@@ -249,6 +303,7 @@ namespace FightSongGameLogicSystem
         int pastHealth = m_CurrentHealth;
         int newHealth = 0;
         int damageDealt = 0;
+        bool damageCausedDeath = false;
         
 
       // If current health is zero don't take damage.
@@ -289,13 +344,9 @@ namespace FightSongGameLogicSystem
           // Set the current health to zero.
             m_CurrentHealth = 0;
 
-            // Function: Die() -> Care and think about deallocate or Destroy from here, should be Game Logic Specific.
+          // Function: Die() -> Care and think about deallocate or Destroy from here, should be Game Logic Specific.
+           damageCausedDeath = Die();
 
-              // Death Effect
-
-              // Call Death Anim
-
-              // Call OnDeath event 
  
       }
 
@@ -314,6 +365,8 @@ namespace FightSongGameLogicSystem
           
 
           // Took Damage Effect
+          PlayOnTakeDamageEffect();
+
          
 
 
@@ -337,11 +390,29 @@ namespace FightSongGameLogicSystem
         // Report to combat logs, achievement system, and etc                              
         EventBus<OnTakeDamageEvent>.Raise(m_UnitOnTakeDamageEvent);
 
-        #if FIGHTSONG_COMBAT_LOG
+#if FIGHTSONG_COMBAT_LOG
           Debug.Log("Target: " +  gameObject.name + " damage dealt to this unit was: " +  damageDealt + " from: " + damageSource.name); 
-        #endif
+#endif
+
+
+      // Return to pool if damage caused the object to die and no gameplay mechanic is preventing it from staying on screen
+      // in an active dead state
+        if (damageCausedDeath)
+        {
+           ReturnUnitToObjectPool();
+        }
+
 
         return damageDealt;
+    }
+
+    protected virtual void PlayOnTakeDamageEffect()
+    {
+      if (m_OnTakeDamageEffect != null)
+      {
+        m_OnTakeDamageEffect.PlayVFX();
+        
+      }
     }
 
     // Base functionality for scaling a unit.

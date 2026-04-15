@@ -8,6 +8,23 @@ public class MonoBehaviourModifier : MonoBehaviour, IModifier
   [SerializeField] protected GameObject m_From;
   [SerializeField] protected List<GameObject> m_Targets;
 
+  protected bool m_IsModifierActive;
+
+
+  protected bool SetModifierToActive()
+  {
+    m_IsModifierActive = true;
+    return true;
+  }
+
+  protected bool SetModifierToInactive()
+  {
+    m_IsModifierActive = false;
+    return true;
+  }
+
+
+
   // async remove modifier from targets after delay
   public GameObject GetFrom()
   {

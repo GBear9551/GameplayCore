@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using UnityEngine;
 using System.Collections.Generic;
+using FightSongLoggingSystem;
 
 namespace FightSongGameLogicSystem 
 {
@@ -18,6 +19,14 @@ namespace FightSongGameLogicSystem
 
         // Get configuration data from the game designer
         var abilityConfiguration = m_AbilityConfigSO as DirectDamageAbilityConfigSO;
+
+        // Grab the deal direct damage modifiers from the the unit.
+        var unitCastingDealDirectDamage = from.GetComponent<Unit>();
+
+        if(unitCastingDealDirectDamage == null)
+        {
+          LoggingSystem.LogString("[DEBUG COMBAT] A none unit is casting an ability, please correct the 'from' data member, class DealDirectDamage, function Use(...)", Unity.VisualScripting.WarningLevel.Info);
+        }
 
         // Create the direct damage modifier for history and reporting.
         DamageModifier directDamageModifier = new DamageModifier(0);
@@ -39,6 +48,7 @@ namespace FightSongGameLogicSystem
                   directDamageModifier.SetTargets(targets);
                   targetIsAUnit.m_Modifiers.AddLast(new DamageModifier(directDamageModifier));
                   targetIsAUnit.TakeDamage(abilityConfiguration.GetDirectDamageAmount(), this.gameObject);
+
             }
           }
 

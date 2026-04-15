@@ -15,7 +15,6 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Splines;
 
 public class Spawner : MonoBehaviour
     {
@@ -384,7 +383,6 @@ public class Spawner : MonoBehaviour
     {
     // Declare and initialize local variables, specific to the SpawnGameObjectsRoutine method scope.
     Transform startingSpawnTransform = m_SpawnerConfig.GetStartingSpawnTransform();
-    Vector3 startingPosition = startingSpawnTransform.position; // Starting position for spawning GameObjects, set in the Unity Editor
     int currentIndex = 0;
     float spawnInterval = m_SpawnerConfig.GetSpawnInterval();
     float spawnCycleDelay = m_SpawnerConfig.GetSpawnCycleDelay();

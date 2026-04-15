@@ -12,19 +12,27 @@ namespace FightSongGameLogicSystem
       [SerializeField] int m_UnitMaxHealth;
       private Unit m_Unit;
 
-      private void Awake()
+      private void Start()
       {
         m_Unit = GetComponent<Unit>();
-      }
+        // Subscribe to unit on take damage event and on created
+        m_Unit.OnTakeDamage += OnTakeDamage;
+        m_Unit.OnHeal += OnHeal;
+        m_Unit.OnUnitSpawn += OnUnitCreatedEvent;
+
+        m_UnitCurrentHealth = m_Unit.GetHealth();
+        m_UnitMaxHealth = m_Unit.GetMaxHealth();
+
+    }
 
 
 
       public void OnEnable()
       {
         // Subscribe to unit on take damage event and on created
-        m_Unit.OnTakeDamage += OnTakeDamage;
+       /* m_Unit.OnTakeDamage += OnTakeDamage;
         m_Unit.OnHeal += OnHeal;
-        m_Unit.OnUnitSpawn += OnUnitCreatedEvent;
+        m_Unit.OnUnitSpawn += OnUnitCreatedEvent;*/
       }
 
       // Remember to unsubscribe i.e. pointer must be set to null at the end of object life time. 

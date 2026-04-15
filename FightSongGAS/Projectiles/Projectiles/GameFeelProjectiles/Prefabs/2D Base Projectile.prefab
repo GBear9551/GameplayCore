@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 4495981972129626854}
   - component: {fileID: 8242463005001109503}
   - component: {fileID: 5518450930775847359}
+  - component: {fileID: 6628982593008705719}
   m_Layer: 0
   m_Name: 2D Base Projectile
   m_TagString: Untagged
@@ -101,6 +102,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_ProjectileConfigSO: {fileID: 11400000, guid: b21e6fe5942fdbd49a234c6d96de1bb6, type: 2}
+  m_OnHitEffect: {fileID: 6628982593008705719}
 --- !u!58 &4495981972129626854
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -175,3 +177,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 901e85c3acbb1904e8aa5de8d548ad5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &6628982593008705719
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8272627558057485761}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ebc4e4dc3fa10844895e19d0d8c13e68, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectConfigSO: {fileID: 11400000, guid: 3632400bd0cc2ef4aa4b79f06e4a3582, type: 2}

@@ -4,7 +4,9 @@ namespace FightSongGameLogicSystem
 {
     public interface IEffect
     {
-        void PlayVFX();
+
+        GameObjectPool CreateVFXGameObjects();
+        GameObjectPool PlayVFX();
         void PlaySFX();
     }
 }

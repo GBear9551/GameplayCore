@@ -11,8 +11,15 @@ namespace FightSongGameLogicSystem
     protected float m_TotalDuration;
     public UnityEvent<List<GameObject>> OnModifierExpiredEvent;
     protected float m_CurrDuration;
-    private bool m_IsModifierActive;
 
+
+
+
+    private void OnDisable()
+    {
+      Remove();
+      SetModifierToInactive();
+    }
 
     public override void Initialize(GameObject from, List<GameObject> targets, float duration)
     {
@@ -29,21 +36,10 @@ namespace FightSongGameLogicSystem
 
       Debug.Log(this.name + this.GetInstanceID().ToString() + " from: " + m_From + "has " + GetCurrentDurationRemaining() + "time remaining.");
       m_CurrDuration = m_TotalDuration;
-      m_IsModifierActive = true;
+      SetModifierToActive();
     }
 
 
-    public bool SetModifierToActive()
-    {
-      m_IsModifierActive = true;
-      return true;
-    }
-
-    public bool SetTotalDuration(float duration)
-    {
-      m_TotalDuration = duration;
-      return true;
-    }
 
     // Update is called once per frame
     protected virtual void Update()
@@ -61,6 +57,7 @@ namespace FightSongGameLogicSystem
           // Remove timedModifier
           if(Remove() == false)
           {
+            var obj = this;
             Debug.LogError("Attempted to remove a modifier that was not registered to a unit. Class TimedModifier(), Func: Update()");
           }
           foreach(var target in m_Targets)
@@ -84,7 +81,13 @@ namespace FightSongGameLogicSystem
       }
 
     }
-    
+
+    private bool SetTotalDuration(float duration)
+    {
+      m_TotalDuration = duration;
+      return true;
+    }
+
     public float GetCurrentDurationRemaining()
     { 
       return m_CurrDuration; 
