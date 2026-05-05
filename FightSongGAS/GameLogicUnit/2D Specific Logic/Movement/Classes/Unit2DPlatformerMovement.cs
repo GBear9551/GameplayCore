@@ -1,8 +1,10 @@
 using FightSongLoggingSystem;
 using FightSongStateMachine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace FightSongGameLogicSystem
@@ -18,18 +20,28 @@ namespace FightSongGameLogicSystem
     [SerializeField] private Transform m_FeetTransform;
     [SerializeField] private Vector2 m_FootSize;
     [SerializeField] private LayerMask m_GroundLayer;
+    [SerializeField] private float m_BigLandingSpeedThreshold;
+
     protected bool m_IsGrounded = false;
     protected Rigidbody2D m_RigidBody2D;
     protected bool m_DoubleJumpAvailable = true;
     protected float m_CoyoteTimer;
     protected LocomotionStateMachine m_LocomotionStateMachine;
+    protected float m_LandingForce;
+
+    private JetpackMechanics m_JetpackMechanics;
     private Vector2 m_MovementVector;
     private float m_TimeSpentInAir;
     private float m_OriginalGravityScale;
+    
 
-
+    public event Action OnBigLandEvent;
     private InputFrame m_InputFrame;
 
+
+    private float m_PreviousVelocity_Y_Speed = 0f;
+    private float m_CurrVel_Y_Speed = 0f;
+    private bool m_IsExtraGravityAllowed = false;
 
 
     private void OnDrawGizmos()
@@ -51,9 +63,10 @@ namespace FightSongGameLogicSystem
 
       m_LocomotionStateMachine = GetComponent<LocomotionStateMachine>();  
       m_RigidBody2D = GetComponent<Rigidbody2D>();
+      m_JetpackMechanics = GetComponent<JetpackMechanics>();
       m_OriginalGravityScale = m_RigidBody2D.gravityScale;
       m_CoyoteTimer = m_PlatformerMovement2DConfigSO.GetCoyoteTime();
-
+  
 
       m_Unit = GetComponent<Unit>();  
  
@@ -68,7 +81,7 @@ namespace FightSongGameLogicSystem
     {
 
       // Pass input frame into movement and jump function, at fixedUpdate
-      m_IsGrounded = CheckGrounded();
+        m_IsGrounded = CheckGrounded();
 
       // If we are not grounded then track time spent in air.
       if(!m_IsGrounded)
@@ -80,6 +93,13 @@ namespace FightSongGameLogicSystem
       {
         m_TimeSpentInAir = 0f;
         m_DoubleJumpAvailable = true;
+        
+        // The overlapping box will be present more often when the frame rate is higher
+        // Handle the landing with velocity to ensure the character isn't heading upward with the overlapping box still being grounded.
+        if (!(m_RigidBody2D.velocity.y > 0f))
+        {
+          m_LocomotionStateMachine.Land();
+        }
       }
 
       // Handle Coyote time
@@ -87,9 +107,34 @@ namespace FightSongGameLogicSystem
 
     }
 
+
+
     protected virtual void FixedUpdate()
     {
-        ExtraGravityLogic();
+        //ExtraGravityLogic();
+
+        m_CurrVel_Y_Speed = Mathf.Abs(m_RigidBody2D.velocity.y);
+
+        if (m_CurrVel_Y_Speed == 0f && m_PreviousVelocity_Y_Speed > 0f)
+        {  
+
+          // Can I imagine happen at apex of parabolic fall, and when landing into the ceiling. 
+          // Consider caching velocity as a vector, and remember to think in terms of determinates and dot/cross products too. 
+          // Caching speed, great for threshold compare, bad for landing state change.
+          if(m_PreviousVelocity_Y_Speed > m_BigLandingSpeedThreshold )
+          {
+            OnBigLandEvent?.Invoke();
+          }
+
+         // Previous velocity should be negative but this is best controlled by a feet collision as platformers, may appear underneath.
+
+        }
+
+        m_PreviousVelocity_Y_Speed = m_CurrVel_Y_Speed;
+
+
+
+
     }
 
     public void HandleCoyoteTime()
@@ -105,13 +150,14 @@ namespace FightSongGameLogicSystem
       }
     }
 
-    public void ExtraGravityLogic()
+    protected virtual void ExtraGravityLogic()
     {
 
       // Declare and initialize variables
+      m_IsExtraGravityAllowed = !m_JetpackMechanics.IsJetPackRunning();
 
       // If time spent in air exceeds the extra gravity delay threshold then activate extra gravity.
-      if(m_TimeSpentInAir > m_PlatformerMovement2DConfigSO.GetExtraGravityDelay())
+      if(m_TimeSpentInAir > m_PlatformerMovement2DConfigSO.GetExtraGravityDelay() && m_IsExtraGravityAllowed)
       {
          m_RigidBody2D.gravityScale = m_PlatformerMovement2DConfigSO.GetExtraGravity();
       }
@@ -137,7 +183,7 @@ namespace FightSongGameLogicSystem
             }
           }
        }
-       m_RigidBody2D.velocity = new Vector2(movementVelocity.x, m_RigidBody2D.velocity.y);
+        m_RigidBody2D.velocity = new Vector2(movementVelocity.x, m_RigidBody2D.velocity.y);
     }
 
     public void Jump(Vector2 JumpForce) 
@@ -163,14 +209,19 @@ namespace FightSongGameLogicSystem
     private bool CheckGrounded()
     {
 
-      Collider2D isGrounded = Physics2D.OverlapBox(m_FeetTransform.position, m_FootSize, 0f, m_GroundLayer );
+      Collider2D collider = Physics2D.OverlapBox(m_FeetTransform.position, m_FootSize, 0f, m_GroundLayer );
+      bool isGrounded = collider != null;
+      /*AbstractLocomotionState state = m_LocomotionStateMachine.GetCurrentLocomotionState();
 
-      if( isGrounded )
+      if( state != null )
       {
-        m_LocomotionStateMachine.Land();
-      }
+        if( state is InAirState)
+        {
+          isGrounded = false;
+        }
+      }*/
 
-        return isGrounded;
+      return isGrounded;
 
     }
 

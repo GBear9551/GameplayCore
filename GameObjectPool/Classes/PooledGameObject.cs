@@ -4,7 +4,7 @@ using UnityEngine.Pool;
     public class PooledGameObject : MonoBehaviour, IPooledGameObject
     {
 
-       private IObjectPool<GameObject> m_pool;
+       protected IObjectPool<GameObject> m_pool;
 
        public virtual void SetPool(IObjectPool<GameObject> pool)
        {

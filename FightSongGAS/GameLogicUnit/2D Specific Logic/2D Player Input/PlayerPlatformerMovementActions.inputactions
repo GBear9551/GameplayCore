@@ -8,7 +8,7 @@
             "actions": [
                 {
                     "name": "Move",
-                    "type": "Value",
+                    "type": "Button",
                     "id": "93a71be1-9d3b-46c3-8257-e18121cd925b",
                     "expectedControlType": "",
                     "processors": "",
@@ -29,7 +29,7 @@
                 {
                     "name": "2D Vector",
                     "id": "8112020f-9971-4df8-9069-64caf6ad5dd8",
-                    "path": "2DVector",
+                    "path": "2DVector(mode=1)",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -40,7 +40,7 @@
                 {
                     "name": "up",
                     "id": "efe89bf9-e053-459e-8b27-a9200a32ee63",
-                    "path": "<Keyboard>/a",
+                    "path": "<Keyboard>/w",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -84,7 +84,7 @@
                 {
                     "name": "2D Vector",
                     "id": "7874dd3b-c4b0-4409-b684-4aa53dd51f21",
-                    "path": "2DVector",
+                    "path": "2DVector(mode=1)",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

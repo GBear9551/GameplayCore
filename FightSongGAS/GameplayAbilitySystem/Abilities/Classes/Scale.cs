@@ -51,8 +51,11 @@ namespace FightSongGameLogicSystem
 
             }
 
-            // Cast Set scale
+          // Cast Set scale
+          if (isUnit != null)
+          {
             isUnit.SetScale();
+          }
 
           }
 

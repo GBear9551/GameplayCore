@@ -3,6 +3,7 @@ using UnityEngine.Events;
 using System.Collections.Generic;
 using UnityEngine.PlayerLoop;
 using System.Linq;
+using FightSongLoggingSystem;
 
 namespace FightSongGameLogicSystem
 {
@@ -49,7 +50,7 @@ namespace FightSongGameLogicSystem
       {
         m_CurrDuration -= Time.deltaTime;
 
-        if (m_CurrDuration <= 0f)
+        if (m_CurrDuration <= 0f )
         {
           m_IsModifierActive = false;
 
@@ -57,10 +58,11 @@ namespace FightSongGameLogicSystem
           // Remove timedModifier
           if(Remove() == false)
           {
+            // If this message is received at console, check the objects OnDisable() and handle TimedModifiers,
             var obj = this;
             Debug.LogError("Attempted to remove a modifier that was not registered to a unit. Class TimedModifier(), Func: Update()");
           }
-          foreach(var target in m_Targets)
+          /*foreach(var target in m_Targets)
           {
             var unit = target.GetComponent<Unit>();
             if(unit != null)
@@ -71,7 +73,7 @@ namespace FightSongGameLogicSystem
                 Debug.Log("The unit: " + unit.gameObject.name + " has this many timed modifiers on it: " + timedModifiers.Count().ToString());
               }
             }
-          }
+          }*/
 
           if (m_Targets != null)
           {
@@ -95,22 +97,28 @@ namespace FightSongGameLogicSystem
 
     public override bool Remove()
     {
+      if(m_Targets == null)
+        return false;
+
       if (m_Targets != null)
       {
-        foreach (GameObject target in m_Targets)
-        {
-          var IsTargetAUnit = target.GetComponent<Unit>();
+        // Bad, TODO: Supplying unnecessary target information is causing unnecessary looping across targets during removal.
+        //foreach (GameObject target in m_Targets)
+        //{
+          var IsTargetAUnit = GetComponent<Unit>();
           if (IsTargetAUnit != null)
           {
             if (IsTargetAUnit.m_Modifiers != null)
             {
               bool wasRemoved = IsTargetAUnit.m_Modifiers.Remove(this);
-              return wasRemoved;
+              LoggingSystem.LogString("[DEBUG] Class Timed Modifer: Function Remove(): [Info] Target Unit: " + IsTargetAUnit.name + ": " + wasRemoved, Unity.VisualScripting.WarningLevel.Info);
+              //return wasRemoved;
             }
           }
-        }
+        //}
       }
-      return false;
+      m_Targets.Clear();
+      return true;
     }
   }
 }

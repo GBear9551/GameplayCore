@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using FightSongGameLogicSystem;
 using FightSongStateMachine;
+using Cinemachine;
 
 namespace FightSongAnimationSystem
 {
@@ -11,6 +12,9 @@ namespace FightSongAnimationSystem
   public abstract class AbstractAnimationPresenter : MonoBehaviour, IAnimationPresenter
   {
 
+    [SerializeField] protected CinemachineImpulseSource m_CinemachImpulseSource;
+    [SerializeField] protected Transform m_MainVisualUsedToModify;
+    [SerializeField] protected Transform m_FeetTransform;
     [SerializeField] protected Effect m_WalkingEffect;
     [SerializeField] protected ParticleSystem m_WalkingSimpleParticleSystem;
     [SerializeField] protected Effect m_JumpingEffect;
@@ -22,6 +26,7 @@ namespace FightSongAnimationSystem
     protected virtual void Awake()
     {
         m_LocomotionStateMachine = GetComponent<LocomotionStateMachine>();
+        m_CinemachImpulseSource = GetComponent<CinemachineImpulseSource>();
 
     }
 
@@ -55,10 +60,20 @@ namespace FightSongAnimationSystem
 
       if(m_JumpingSimpleParticleSystem != null)
       {
-         if(m_JumpingSimpleParticleSystem.isPlaying == false)
-         {
-            m_JumpingSimpleParticleSystem.Play();
-         }
+
+          m_JumpingSimpleParticleSystem.transform.position = m_FeetTransform.position;
+          m_JumpingSimpleParticleSystem.Play();
+         
+      }
+
+    }
+
+    protected virtual void StopJumpEffect()
+    {
+
+      if(m_JumpingSimpleParticleSystem != null)
+      {
+         m_JumpingSimpleParticleSystem.Stop();  
       }
 
     }

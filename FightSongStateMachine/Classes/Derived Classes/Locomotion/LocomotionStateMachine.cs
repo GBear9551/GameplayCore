@@ -13,6 +13,8 @@ namespace FightSongStateMachine
     [SerializeField] public UnityEvent OnGroundedEvent;
     [SerializeField] public UnityEvent OnInAirEvent;
 
+
+    // Grounded State being entered on jump TODO
     private AbstractLocomotionState m_currentState;
 
 
@@ -27,11 +29,16 @@ namespace FightSongStateMachine
     }
 
 
-      public virtual void SetState(AbstractLocomotionState newState)
+    public virtual void SetState(AbstractLocomotionState newState)
     {
       if (newState == null)
       {
         Debug.LogWarning("Tried to set locomotion state to null.");
+        return;
+      }
+
+      if( newState == m_currentState)
+      {
         return;
       }
 

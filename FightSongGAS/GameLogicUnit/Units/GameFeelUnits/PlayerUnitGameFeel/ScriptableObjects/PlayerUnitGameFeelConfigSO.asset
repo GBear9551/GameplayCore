@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_BaseUnitStatSystem: {fileID: 11400000, guid: 8eda7e1922e939e49accc560f774c012, type: 2}
   m_BaseGroundSpeed: 15
-  m_JumpBaseForce: 18.5
+  m_JumpBaseForce: 12.5
   m_JumpBaseCooldown: 4
-  m_DoubleJumpBaseForce: 12
+  m_DoubleJumpBaseForce: 4
   m_BaseDamage: 15
   m_KnockBackForce: 10
   m_MaxHealthPoints: 25
-  m_MaxAllowedSize: {x: 0.5, y: 0.5, z: 0.5}
+  m_MaxAllowedSize: {x: 5, y: 5, z: 5}
   m_MinAllowedSize: {x: 2, y: 2, z: 2}
   m_ChangeDirectionInterval: 3

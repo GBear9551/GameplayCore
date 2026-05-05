@@ -19,8 +19,17 @@ namespace FightSongGameLogicSystem
       [SerializeField] protected Effect OnHitEffect;
 
         
-        protected abstract bool ValidateConfig();
 
+
+        public AbstractAbilityConfigSO GetAbilityConfig()
+        { 
+          return m_AbilityConfigSO; 
+        }
+
+        protected abstract bool ValidateConfig();
+ 
+
+        
 
         protected static T AddTimedModifierComponent<T>(GameObject target) where T : TimedModifier
         {

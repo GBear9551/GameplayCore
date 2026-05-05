@@ -3,8 +3,20 @@ using UnityEngine;
 
 namespace FightSongGameLogicSystem
 {
-    public class MovementTimedModifier : TimedModifier 
+    public class MovementTimedModifier : TimedModifier, IMovementModifier 
     {
+
+
+      [SerializeField] private float m_MovementSpeedModifier;
+
+ 
+
+      public void Initialize(GameObject from, List<GameObject> targets, float duration, float speedModificationAmount)
+      {
+          Initialize(from, targets, duration);
+          m_MovementSpeedModifier = speedModificationAmount;
+      }
+
       // Update termination -> Modifier <- or -> TimedModifier 
       public override void Initialize(GameObject from, List<GameObject> targets, float duration)
       {
@@ -13,5 +25,10 @@ namespace FightSongGameLogicSystem
           base.Initialize(from, targets, duration);
         }
       }
+
+    public float GetMovementModifier()
+    {
+      return m_MovementSpeedModifier;
     }
+  }
 }

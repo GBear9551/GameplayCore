@@ -11,14 +11,17 @@ public class PlayerInput2DPlatformerHandler : MonoBehaviour
   private InputAction m_Move;
   private InputAction m_Jump;
 
-  public InputFrame m_InputFrame { get; private set; }
+  public InputFrame InputFrame { get; private set; }
 
-  private void Awake()
+
+
+   void Awake()
   {
+     
      m_PlayerActions = new PlayerPlatformerMovementActions();
-
      m_Move = m_PlayerActions.Movement.Move;
      m_Jump = m_PlayerActions.Movement.Jump;
+ 
 
   }
 
@@ -36,7 +39,9 @@ public class PlayerInput2DPlatformerHandler : MonoBehaviour
   private void Update()
   {
       // Gather input.
-      m_InputFrame = GatherInput();
+      InputFrame = GatherInput();
+
+      Debug.Log("Input frame: " +  InputFrame.Movement.x + "  " + InputFrame.Movement.y);
 
   }
 

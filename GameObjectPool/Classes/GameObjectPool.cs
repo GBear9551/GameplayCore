@@ -22,7 +22,6 @@ public class GameObjectPool : MonoBehaviour
        [SerializeField] private int m_defaultCapacity = 10;
        [SerializeField] private int m_maxSize = 10;
        private List<GameObject> m_ActiveObjectsInPool = new List<GameObject>();
-       private int m_InstanceCreationAttempts = 0;
 
 
        private static List<GameObjectPool> m_RegisteredPools = new List<GameObjectPool>();

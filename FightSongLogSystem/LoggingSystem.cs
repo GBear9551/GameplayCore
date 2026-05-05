@@ -6,7 +6,7 @@ namespace FightSongLoggingSystem
     public static class LoggingSystem
     {
 
-       public static bool IsConsoleLogging = true;
+       public static bool IsConsoleLogging = false;
        public static bool IsUILogging = false;
        public static bool IsLoggingToFile = false;
 

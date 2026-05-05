@@ -2,6 +2,7 @@ using NUnit.Framework;
 using UnityEngine;
 using System.Collections.Generic;
 using FightSongLoggingSystem;
+using FightSongSoundSystem;
 
 namespace FightSongGameLogicSystem
 {
@@ -9,19 +10,56 @@ namespace FightSongGameLogicSystem
   {
 
      [SerializeField] EffectConfigSO m_EffectConfigSO;
-     /*[SerializeField] GameObject m_VFXPoolGameObject;
-     
-     private  GameObject m_VFXPoolGameObjectInstance;
-     private  GameObjectPool m_VFXPoolComponentInstance = null;*/
 
-
+     private List<SoundConfigSO> m_Sounds;
 
     public void Awake()
     {
+        m_Sounds = m_EffectConfigSO.GetSounds();
+    }
+
+
+    public virtual void PlaySFX()
+    {
+
+      // Declare and initialize variables
+      List<SoundConfigSO> soundConfigs = null;
+
+      // Grab the list of sound data
+      soundConfigs = m_EffectConfigSO.GetSounds();
+
+      // If the list of sound data exists
+      if (soundConfigs != null)
+      {
+
+        // Loop for each sound data, play the audio clip associated with the sound data config.
+        foreach (SoundConfigSO soundConfig in soundConfigs)
+        {
+
+
+          // Play sound via the audio system.
+          AudioSystem.PlaySound(soundConfig);
+
+            // Grab an audio source from the audio system
+            //audioSource = AudioSystem.Instance.GetAudioSource();
+
+            // Use the current sound data config to configure the audio source.
+            // Function: AudioSystem.ConfigureAudioSource(AudioSource,SoundConfigSO)
+            //AudioSystem.ConfigureAudioSource(audioSource, soundConfig);
+
+            // Play the audio source with the audio clip.
+            //AudioSystem.PlayAudioSource(audioSource);
+          
+        }
+
+      }
+
+
 
     }
 
-    public virtual void PlaySFX()
+
+   /* public virtual void PlaySFX()
       { 
 
          AudioSource audioSource = m_EffectConfigSO.GetAudioSource();
@@ -43,7 +81,7 @@ namespace FightSongGameLogicSystem
           }
 
          }
-      }
+      }*/
 
 
 

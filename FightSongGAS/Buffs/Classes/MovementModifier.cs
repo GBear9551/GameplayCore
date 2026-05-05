@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace FightSongGameLogicSystem 
 {
-    public class MovementModifier : Modifier 
+    public class MovementModifier : Modifier, IMovementModifier 
     {
        [SerializeField] private float m_MovementSpeedModifier;
 

@@ -19,7 +19,8 @@ namespace FightSongGameLogicSystem
     protected override void Update()
     {
       // Gather Input
-      m_InputFrame = m_PlayerInputHandler.m_InputFrame;
+      m_InputFrame = m_PlayerInputHandler.InputFrame;
+
 
       base.Update();
 
@@ -31,8 +32,11 @@ namespace FightSongGameLogicSystem
 
     protected override void FixedUpdate()
     {
+
+      ExtraGravityLogic();
       base.FixedUpdate();
       Move();
+
     }
 
 

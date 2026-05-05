@@ -51,13 +51,6 @@ namespace FightSongGameLogicSystem
         }
       }
 
-      public void OnUnitCreated(OnUnitSpawnEvent eventMessage)
-      {
-        if (m_Unit == eventMessage.m_UnitDataModel)
-        {
-            UpdateHealthBar( m_Unit.GetHealth(), m_Unit.GetMaxHealth());
-        }
-      }
 
 
       public void UpdateHealthBar(float currentHealth, float maxHealth)
@@ -79,6 +72,14 @@ namespace FightSongGameLogicSystem
         m_Unit.OnHeal += OnHeal;
         m_Unit.OnUnitSpawn += OnUnitCreated;
 
+      }
+
+      public void OnUnitCreated(OnUnitSpawnEvent eventMessage)
+      {
+        if (m_Unit == eventMessage.m_UnitDataModel)
+        {
+            UpdateHealthBar( m_Unit.GetHealth(), m_Unit.GetMaxHealth());
+        }
       }
 
 

@@ -17,5 +17,5 @@ MonoBehaviour:
   m_CurrentAbilityLevel: 1
   m_TimedBuff: 0
   m_BuffDuration: 0
-  m_KnockBackForce: 1
+  m_KnockBackForce: 25
   m_KnockBackStunDuration: 0.2

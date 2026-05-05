@@ -17,4 +17,4 @@ MonoBehaviour:
   m_CurrentAbilityLevel: 1
   m_TimedBuff: 1
   m_BuffDuration: 1
-  m_ScaleAmount: {x: -0.1, y: -0.1, z: -0.1}
+  m_ScaleAmount: {x: 0.15, y: 0.15, z: 0.15}

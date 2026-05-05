@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_prefabsToPool:
-  - {fileID: 2071332112215297068, guid: a2c13e09d8b921f42bc8889b3bd57bd6, type: 3}
+  - {fileID: 2952008614321600827, guid: 9527be94029a5474599eee5c16d94c98, type: 3}
   m_ParentObjectForPooledObject: {fileID: 0}
   OnCreateDependencyInjectionEvent:
     m_PersistentCalls:

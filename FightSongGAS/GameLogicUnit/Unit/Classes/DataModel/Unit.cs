@@ -18,6 +18,7 @@ namespace FightSongGameLogicSystem
   {
 
 
+    [SerializeField] protected bool m_IsFriendlyUnit;
     [SerializeField] protected UnitConfig m_UnitConfig;
 
     [SerializeField] protected Effect m_OnTakeDamageEffect;
@@ -106,6 +107,18 @@ namespace FightSongGameLogicSystem
 
     }
 
+    public virtual bool GetIsFriendly()
+    {
+
+      // Check for psyche modifiers
+
+      // Check for Chaos modifiers
+
+      return m_IsFriendlyUnit;  
+
+    }
+
+
     public virtual int GetHealth()
     {
        return m_CurrentHealth;  
@@ -132,7 +145,7 @@ namespace FightSongGameLogicSystem
         }
       }
 
-      foreach(MovementModifier movement in m_Modifiers.OfType<MovementModifier>())
+      foreach(IMovementModifier movement in m_Modifiers.OfType<IMovementModifier>())
       {
           speedModifier += movement.GetMovementModifier();
       }
@@ -310,8 +323,10 @@ namespace FightSongGameLogicSystem
         if (m_CurrentHealth == 0) return 0;
 
       // If unit is invulnerable, take no damage, TODO: remove captured data, use calculation to avoid cache-invalidation.
-      bool cap = m_Modifiers.OfType<InvulnerabilityModifier>().Any();
-      if (cap)
+      bool invulModifierExists = m_Modifiers.OfType<InvulnerabilityModifier>().Any();
+
+
+      if (invulModifierExists)
       {
         Debug.Log("Damage Dealt: 0 from " + damageSource.name + "because target: " + gameObject.name + " was invulnerable.");
         return 0;
@@ -416,7 +431,7 @@ namespace FightSongGameLogicSystem
     }
 
     // Base functionality for scaling a unit.
-    public bool SetScale()
+    public virtual bool SetScale()
     {
 
        // Declare and initialize variables

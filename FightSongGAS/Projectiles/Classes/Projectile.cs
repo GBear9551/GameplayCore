@@ -14,6 +14,7 @@ namespace FightSongGameLogicSystem
     [Header("Creating an ability runner can be fun! Attach it to the projectile config SO")]
     [SerializeField] ProjectileSO m_ProjectileConfigSO;
     [SerializeField] Effect m_OnHitEffect;
+    [SerializeField] Effect m_OnCreateEffect;
 
 
     // Projectile Modifiers
@@ -30,6 +31,12 @@ namespace FightSongGameLogicSystem
     private void OnEnable()
     {
       m_MovementModifiers = new LinkedList<MovementModifier>();
+      
+      if(m_OnCreateEffect != null)
+      {
+        m_OnCreateEffect.PlaySFX();
+      }
+
     }
 
     private void OnDisable()
@@ -94,11 +101,13 @@ namespace FightSongGameLogicSystem
     protected virtual void HandleTrigger(GameObject otherObject)
     {
 
+      if (otherObject.layer == LayerMask.NameToLayer("TestLayer")) return;
       PlayOnHitEffect();
 
       Unit unit = otherObject.GetComponent<Unit>();
 
       // Consider friendly fire
+
 
       if (unit != null && otherObject.layer != LayerMask.NameToLayer("Friendly")) 
       {
@@ -114,14 +123,22 @@ namespace FightSongGameLogicSystem
           abilityRunner.UseAbility(m_targets);
         }
         m_targets.Clear();
+
+
+       // This is happening twice [BUG] TODO
       // If Projectile is not piercing 
        m_PooledObject.ReturnToPool();
 
       }
 
-      if(otherObject.layer == LayerMask.NameToLayer("Ground"))
+      if (otherObject.layer == LayerMask.NameToLayer("Ground"))
       {
         // If Projectile is not piercing 
+        m_PooledObject.ReturnToPool();
+      }
+
+      else
+      {
         m_PooledObject.ReturnToPool();
       }
        

@@ -13,4 +13,8 @@ MonoBehaviour:
   m_Name: HasteAbilityConfigSO
   m_EditorClassIdentifier: Assembly-CSharp::FightSongGameLogicSystem.HasteAbilityConfigSO
   m_AbilityType: 5
-  m_MovementSpeedModificationAmount: 5
+  m_CastTime: 0
+  m_CurrentAbilityLevel: 1
+  m_TimedBuff: 1
+  m_BuffDuration: 5
+  m_MovementSpeedModificationAmount: 12
